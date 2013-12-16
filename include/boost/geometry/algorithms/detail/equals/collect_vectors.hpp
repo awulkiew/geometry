@@ -4,6 +4,9 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
+// This file was modified by Oracle on 2013.
+// Modifications copyright (c) 2013, Oracle and/or its affiliates.
+
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
 // (geolib/GGL), copyright (c) 1995-2010 Geodan, Amsterdam, the Netherlands.
 
@@ -14,6 +17,7 @@
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DETAIL_EQUALS_COLLECT_VECTORS_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_EQUALS_COLLECT_VECTORS_HPP
 
+#include <boost/geometry/algorithms/detail/equals/collected_vector.hpp>
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/range.hpp>
@@ -25,161 +29,90 @@
 #include <boost/geometry/core/interior_rings.hpp>
 #include <boost/geometry/geometries/concepts/check.hpp>
 
-#include <boost/geometry/util/math.hpp>
-
-
+// TEMP
+#include <boost/static_assert.hpp>
 
 namespace boost { namespace geometry
 {
 
-// TODO: if Boost.LA of Emil Dotchevski is accepted, adapt this
-template <typename T>
-struct collected_vector
-{
-    typedef T type;
-
-    inline collected_vector()
-    {}
-
-    inline collected_vector(T const& px, T const& py,
-            T const& pdx, T const& pdy)
-        : x(px)
-        , y(py)
-        , dx(pdx)
-        , dy(pdy)
-        , dx_0(T())
-        , dy_0(T())
-    {}
-
-    T x, y;
-    T dx, dy;
-    T dx_0, dy_0;
-
-    // For sorting
-    inline bool operator<(collected_vector<T> const& other) const
-    {
-        if (math::equals(x, other.x))
-        {
-            if (math::equals(y, other.y))
-            {
-                if (math::equals(dx, other.dx))
-                {
-                    return dy < other.dy;
-                }
-                return dx < other.dx;
-            }
-            return y < other.y;
-        }
-        return x < other.x;
-    }
-
-    inline bool same_direction(collected_vector<T> const& other) const
-    {
-        // For high precision arithmetic, we have to be
-        // more relaxed then using ==
-        // Because 2/sqrt( (0,0)<->(2,2) ) == 1/sqrt( (0,0)<->(1,1) )
-        // is not always true (at least, it is not for ttmath)
-        return math::equals_with_epsilon(dx, other.dx)
-            && math::equals_with_epsilon(dy, other.dy);
-    }
-
-    // For std::equals
-    inline bool operator==(collected_vector<T> const& other) const
-    {
-        return math::equals(x, other.x)
-            && math::equals(y, other.y)
-            && same_direction(other);
-    }
-};
-
 
 #ifndef DOXYGEN_NO_DETAIL
-namespace detail { namespace collect_vectors
+namespace detail { namespace equals
 {
 
 
 template <typename Range, typename Collection>
 struct range_collect_vectors
 {
-    typedef typename boost::range_value<Collection>::type item_type;
-    typedef typename item_type::type calculation_type;
+    typedef typename boost::range_value<Collection>::type vector_type;
+
+    static const bool temp_check = vector_type::directional;
+    BOOST_STATIC_ASSERT(temp_check); // currently not implemented for nondirectional
 
     static inline void apply(Collection& collection, Range const& range)
     {
-        if (boost::size(range) < 2)
-        {
-            return;
-        }
-
         typedef typename boost::range_iterator<Range const>::type iterator;
 
-        bool first = true;
+        if ( boost::size(range) < 2 )
+            return;
+
         iterator it = boost::begin(range);
-
-        for (iterator prev = it++;
-            it != boost::end(range);
-            prev = it++)
+        for ( iterator prev = it++ ; it != boost::end(range) ; prev = it++ )
         {
-            typename boost::range_value<Collection>::type v;
-
-            v.x = get<0>(*prev);
-            v.y = get<1>(*prev);
-            v.dx = get<0>(*it) - v.x;
-            v.dy = get<1>(*it) - v.y;
-            v.dx_0 = v.dx;
-            v.dy_0 = v.dy;
+            vector_type v;
+            v.from_segment(*prev, *it);
 
             // Normalize the vector -> this results in points+direction
             // and is comparible between geometries
-            calculation_type magnitude = sqrt(
-                boost::numeric_cast<calculation_type>(v.dx * v.dx + v.dy * v.dy));
+            bool ok = v.normalize();
 
             // Avoid non-duplicate points (AND division by zero)
-            if (magnitude > 0)
+            if ( ok )
             {
-                v.dx /= magnitude;
-                v.dy /= magnitude;
-
                 // Avoid non-direction changing points
-                if (first || ! v.same_direction(collection.back()))
+                if ( collection.empty()
+                  || ! v.equal_direction(collection.back()))
                 {
                     collection.push_back(v);
                 }
-                first = false;
             }
         }
 
-        // If first one has same direction as last one, remove first one
-        if (boost::size(collection) > 1
-            && collection.front().same_direction(collection.back()))
+        // If first one has the same direction as the last one, remove the first one
+        if ( boost::size(collection) > 1
+          && collection.front().equal_direction(collection.back()) )
         {
             collection.erase(collection.begin());
         }
     }
 };
 
-
+// TODO: implement n-dimensional version
 template <typename Box, typename Collection>
 struct box_collect_vectors
 {
     // Calculate on coordinate type, but if it is integer,
     // then use double
     typedef typename boost::range_value<Collection>::type item_type;
-    typedef typename item_type::type calculation_type;
 
     static inline void apply(Collection& collection, Box const& box)
     {
-        typename point_type<Box>::type lower_left, lower_right,
-                upper_left, upper_right;
+        typedef typename item_type::origin_type origin_type;
+        typedef typename item_type::direction_type direction_type;
+
+        // REMARK: originally Box's point_type was used here
+        origin_type lower_left, lower_right, upper_left, upper_right;
+
         geometry::detail::assign_box_corners(box, lower_left, lower_right,
                 upper_left, upper_right);
 
         typedef typename boost::range_value<Collection>::type item;
 
-        collection.push_back(item(get<0>(lower_left), get<1>(lower_left), 0, 1));
-        collection.push_back(item(get<0>(upper_left), get<1>(upper_left), 1, 0));
-        collection.push_back(item(get<0>(upper_right), get<1>(upper_right), 0, -1));
-        collection.push_back(item(get<0>(lower_right), get<1>(lower_right), -1, 0));
+        // REMARK: and here coordinates were converted to calculation_type
+        collection.push_back(item(lower_left, direction_type(0, 1)));
+        collection.push_back(item(upper_left, direction_type(1, 0)));
+        collection.push_back(item(upper_right, direction_type(0, -1)));
+        collection.push_back(item(lower_right, direction_type(-1, 0)));
     }
 };
 
@@ -220,14 +153,10 @@ struct multi_collect_vectors
 };
 
 
-}} // namespace detail::collect_vectors
-#endif // DOXYGEN_NO_DETAIL
+}} // namespace detail::equals
 
 
-
-#ifndef DOXYGEN_NO_DISPATCH
-namespace dispatch
-{
+namespace detail_dispatch { namespace equals {
 
 
 template
@@ -245,36 +174,36 @@ struct collect_vectors
 
 template <typename Collection, typename Box>
 struct collect_vectors<box_tag, Collection, Box>
-    : detail::collect_vectors::box_collect_vectors<Box, Collection>
+    : detail::equals::box_collect_vectors<Box, Collection>
 {};
 
 
 
 template <typename Collection, typename Ring>
 struct collect_vectors<ring_tag, Collection, Ring>
-    : detail::collect_vectors::range_collect_vectors<Ring, Collection>
+    : detail::equals::range_collect_vectors<Ring, Collection>
 {};
 
 
 template <typename Collection, typename LineString>
 struct collect_vectors<linestring_tag, Collection, LineString>
-    : detail::collect_vectors::range_collect_vectors<LineString, Collection>
+    : detail::equals::range_collect_vectors<LineString, Collection>
 {};
 
 
 template <typename Collection, typename Polygon>
 struct collect_vectors<polygon_tag, Collection, Polygon>
-    : detail::collect_vectors::polygon_collect_vectors<Polygon, Collection>
+    : detail::equals::polygon_collect_vectors<Polygon, Collection>
 {};
 
 
 template <typename Collection, typename MultiPolygon>
 struct collect_vectors<multi_polygon_tag, Collection, MultiPolygon>
-    : detail::collect_vectors::multi_collect_vectors
+    : detail::equals::multi_collect_vectors
         <
             MultiPolygon,
             Collection,
-            detail::collect_vectors::polygon_collect_vectors
+            detail::equals::polygon_collect_vectors
             <
                 typename boost::range_value<MultiPolygon>::type,
                 Collection
@@ -284,9 +213,10 @@ struct collect_vectors<multi_polygon_tag, Collection, MultiPolygon>
 
 
 
-} // namespace dispatch
-#endif
+}} // namespace detail_dispatch::equals
 
+
+namespace detail { namespace equals {
 
 /*!
     \ingroup collect_vectors
@@ -300,13 +230,16 @@ inline void collect_vectors(Collection& collection, Geometry const& geometry)
 {
     concept::check<Geometry const>();
 
-    dispatch::collect_vectors
+    detail_dispatch::equals::collect_vectors
         <
             typename tag<Geometry>::type,
             Collection,
             Geometry
         >::apply(collection, geometry);
 }
+
+}} // namespace detail::equals
+#endif // DOXYGEN_NO_DETAIL
 
 
 }} // namespace boost::geometry

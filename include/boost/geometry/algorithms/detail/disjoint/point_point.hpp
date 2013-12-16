@@ -39,7 +39,15 @@ struct point_point
 {
     static inline bool apply(Point1 const& p1, Point2 const& p2)
     {
-        if (! geometry::math::equals(get<Dimension>(p1), get<Dimension>(p2)))
+        typedef typename coordinate_type<Point1>::type coord1;
+        typedef typename coordinate_type<Point2>::type coord2;
+        return apply(p1, p2, geometry::math::equals<coord1, coord2>);
+    }
+
+    template <typename CoordinateCompare>
+    static inline bool apply(Point1 const& p1, Point2 const& p2, CoordinateCompare compare)
+    {
+        if (! compare(get<Dimension>(p1), get<Dimension>(p2)))
         {
             return true;
         }
@@ -47,7 +55,7 @@ struct point_point
             <
                 Point1, Point2,
                 Dimension + 1, DimensionCount
-            >::apply(p1, p2);
+            >::apply(p1, p2, compare);
     }
 };
 
@@ -56,6 +64,12 @@ template <typename Point1, typename Point2, std::size_t DimensionCount>
 struct point_point<Point1, Point2, DimensionCount, DimensionCount>
 {
     static inline bool apply(Point1 const& , Point2 const& )
+    {
+        return false;
+    }
+
+    template <typename CoordinateCompare>
+    static inline bool apply(Point1 const& , Point2 const& , CoordinateCompare)
     {
         return false;
     }
@@ -81,24 +95,7 @@ inline bool disjoint_point_point(Point1 const& point1, Point2 const& point2)
 #endif // DOXYGEN_NO_DETAIL
 
 
-#ifndef DOXYGEN_NO_DETAIL
-namespace detail { namespace equals
-{
-
-/*!
-    \brief Internal utility function to detect of points are disjoint
-    \note To avoid circular references
- */
-template <typename Point1, typename Point2>
-inline bool equals_point_point(Point1 const& point1, Point2 const& point2)
-{
-    return ! detail::disjoint::disjoint_point_point(point1, point2);
-}
-
-
-}} // namespace detail::equals
-#endif // DOXYGEN_NO_DETAIL
-
 }} // namespace boost::geometry
+
 
 #endif // BOOST_GEOMETRY_ALGORITHMS_DETAIL_DISJOINT_POINT_POINT_HPP

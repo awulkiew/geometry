@@ -4,6 +4,9 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
+// This file was modified by Oracle on 2013.
+// Modifications copyright (c) 2013, Oracle and/or its affiliates.
+
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
 // (geolib/GGL), copyright (c) 1995-2010 Geodan, Amsterdam, the Netherlands.
 
@@ -42,6 +45,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 
+#include <boost/geometry/geometries/point.hpp>
 
 namespace boost { namespace geometry
 {
@@ -125,11 +129,20 @@ struct equals_by_collection
                 double
             >::type calculation_type;
 
-        typedef std::vector<collected_vector<calculation_type> > v;
-        v c1, c2;
+        typedef geometry::model::point
+            <
+                calculation_type,
+                geometry::dimension<Geometry1>::value,
+                typename geometry::coordinate_system<Geometry1>::type
+            > point_type;
 
-        geometry::collect_vectors(c1, geometry1);
-        geometry::collect_vectors(c2, geometry2);
+        // TODO: consider using coordinate_type for origin and calculation_type for direction
+        typedef detail::equals::collected_vector<point_type, point_type, true> vector_type;
+        typedef std::vector<vector_type> collection;
+        collection c1, c2;
+
+        detail::equals::collect_vectors(c1, geometry1);
+        detail::equals::collect_vectors(c2, geometry2);
 
         if (boost::size(c1) != boost::size(c2))
         {
