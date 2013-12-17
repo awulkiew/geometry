@@ -34,8 +34,6 @@ namespace boost { namespace geometry {
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail { namespace equals {
 
-// TODO: Move to detail/collected_vector
-
 template <typename Origin,
           typename Direction,
           bool Directional,

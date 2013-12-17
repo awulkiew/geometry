@@ -109,7 +109,7 @@ struct length_check
 };
 
 
-template <typename TrivialCheck>
+template <typename TrivialCheck, bool Directional = true>
 struct equals_by_collection
 {
     template <typename Geometry1, typename Geometry2>
@@ -137,7 +137,7 @@ struct equals_by_collection
             > point_type;
 
         // TODO: consider using coordinate_type for origin and calculation_type for direction
-        typedef detail::equals::collected_vector<point_type, point_type, true> vector_type;
+        typedef detail::equals::collected_vector<point_type, point_type, Directional> vector_type;
         typedef std::vector<vector_type> collection;
         collection c1, c2;
 
@@ -231,9 +231,9 @@ struct equals<Polygon1, Polygon2, polygon_tag, polygon_tag, 2, Reverse>
 {};
 
 
-template <typename LineString1, typename LineString2, bool Reverse>
-struct equals<LineString1, LineString2, linestring_tag, linestring_tag, 2, Reverse>
-    : detail::equals::equals_by_collection<detail::equals::length_check>
+template <typename LineString1, typename LineString2, std::size_t DimensionCount, bool Reverse>
+struct equals<LineString1, LineString2, linestring_tag, linestring_tag, DimensionCount, Reverse>
+    : detail::equals::equals_by_collection<detail::equals::length_check, false>
 {};
 
 

@@ -29,9 +29,6 @@
 #include <boost/geometry/core/interior_rings.hpp>
 #include <boost/geometry/geometries/concepts/check.hpp>
 
-// TEMP
-#include <boost/static_assert.hpp>
-
 namespace boost { namespace geometry
 {
 
@@ -46,10 +43,12 @@ struct range_collect_vectors
 {
     typedef typename boost::range_value<Collection>::type vector_type;
 
-    static const bool temp_check = vector_type::directional;
-    BOOST_STATIC_ASSERT(temp_check); // currently not implemented for nondirectional
-
     static inline void apply(Collection& collection, Range const& range)
+    {
+        apply(collection, range, boost::mpl::bool_<vector_type::directional>());
+    }
+
+    static inline void apply(Collection& collection, Range const& range, boost::mpl::bool_<true> /*directional*/)
     {
         typedef typename boost::range_iterator<Range const>::type iterator;
 
@@ -60,6 +59,7 @@ struct range_collect_vectors
         for ( iterator prev = it++ ; it != boost::end(range) ; prev = it++ )
         {
             vector_type v;
+            // NOTE: this works differently for directional and non-directional
             v.from_segment(*prev, *it);
 
             // Normalize the vector -> this results in points+direction
@@ -82,7 +82,63 @@ struct range_collect_vectors
         if ( boost::size(collection) > 1
           && collection.front().equal_direction(collection.back()) )
         {
-            collection.erase(collection.begin());
+            //collection.erase(collection.begin());
+            collection.front() = collection.back();
+            collection.pop_back();
+        }
+    }
+
+    static inline void apply(Collection& collection, Range const& range, boost::mpl::bool_<false> /*directional*/)
+    {
+        typedef typename boost::range_iterator<Range const>::type iterator;
+        typedef typename vector_type::origin_type origin_type;
+        static const geometry::less<origin_type> origin_less;
+
+        if ( boost::size(range) < 2 )
+            return;
+
+        iterator it = boost::begin(range);
+        for ( iterator prev = it++ ; it != boost::end(range) ; prev = it++ )
+        {
+            vector_type v;
+            // NOTE: this works differently for directional and non-directional
+            v.from_segment(*prev, *it);
+
+            // Normalize the vector -> this results in points+direction
+            // and is comparible between geometries
+            bool ok = v.normalize();
+
+            // Avoid non-duplicate points (AND division by zero)
+            if ( ok )
+            {
+                // Avoid non-direction changing points
+                if ( collection.empty()
+                  || ! v.equal_direction(collection.back()) )
+                {
+                    collection.push_back(v);
+                }
+                // TODO: maybe move this to collected_vector somehow
+                // because it already works differently for directional/non-directional (e.g.: from_segment())
+                // maybe it would be possible to close there all differences between directional and non-directional
+                // or remove it from collected_vector and keep it here
+                else if ( origin_less(v.origin, collection.back().origin) )
+                {
+                    collection.back().origin = v.origin; // CONSIDER: copy whole vector?
+                }
+            }
+        }
+
+        // If first one has the same direction as the last one, remove the first one
+        if ( boost::size(collection) > 1
+          && collection.front().equal_direction(collection.back()) )
+        {
+            //collection.erase(collection.begin());
+            // TODO: again maybe move to collected_vector
+            if ( origin_less(collection.back().origin, collection.front().origin) )
+            {
+                collection.front().origin = collection.back().origin; // CONSIDER: copy whole vector?
+            }
+            collection.pop_back();
         }
     }
 };
