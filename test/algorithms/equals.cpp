@@ -95,8 +95,11 @@ void test_all()
     test_geometry<linestring, linestring>("ls1", "LINESTRING(1 1,2 2)", "LINESTRING(1 1,2 2)", true);
 
     // REVERSE linestring
-    // Is this equal? To be decided.
-    test_geometry<linestring, linestring>("ls1", "LINESTRING(1 1,2 2)", "LINESTRING(2 2,1 1)", true);
+    test_geometry<linestring, linestring>("ls2", "LINESTRING(1 1,2 2)", "LINESTRING(2 2,1 1)", true);
+
+    // NON-SIMPLE LINESTRINGS
+//    test_geometry<linestring, linestring>("ls3", "LINESTRING(0 5,5 5,5 10,10 10,10 5,5 5,5 0)",
+//                                                 "LINESTRING(0 5,10 5,10 10,5 10,5 0)", true);
 
 }
 

@@ -18,6 +18,7 @@
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_EQUALS_COLLECT_VECTORS_HPP
 
 #include <boost/geometry/algorithms/detail/equals/collected_vector.hpp>
+#include <boost/geometry/algorithms/detail/equals/segments_info.hpp>
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/range.hpp>

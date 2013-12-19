@@ -21,18 +21,20 @@ namespace detail { namespace sub_geometry {
 // polygons/multi_polygons also need ring_index member
 struct index_type
 {
-    index_type() : multi_index(-1) {}
+    index_type() : multi_index(-1), ring_index(-1) {}
 
-    int multi_index;
+    int multi_index; // TODO: not needed for non-multi-geometries
+    int ring_index;  // TODO: not needed for non-polygons
 
     inline bool operator<(index_type const& i) const
     {
-        return multi_index < i.multi_index;
+        return multi_index < i.multi_index ||
+             ( multi_index == i.multi_index && ring_index < i.ring_index );
     }
 
     inline bool operator==(index_type const& i) const
     {
-        return multi_index == i.multi_index;
+        return multi_index == i.multi_index && ring_index == i.ring_index;
     }
 };
 
