@@ -184,6 +184,9 @@ struct to_points_range<Geometry, Tag, true>
 //                 |
 //                 |
 //               (5 0)
+//
+// IMPORTANT! Note that if there are no equal points those segments won't be generated.
+// This means that next segments still must be checked for the same direction
 
 template <typename Geometry, typename CollectedVector>
 class segments_info
