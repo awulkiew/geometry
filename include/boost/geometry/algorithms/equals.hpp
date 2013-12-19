@@ -41,6 +41,7 @@
 #include <boost/geometry/util/select_most_precise.hpp>
 
 #include <boost/geometry/algorithms/detail/equals/collect_vectors.hpp>
+#include <boost/geometry/algorithms/detail/equals/point_point.hpp>
 
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -157,6 +158,33 @@ struct equals_by_collection
     }
 };
 
+template <typename Segment1, typename Segment2, bool Directional = true>
+struct segment_segment
+{
+    static inline bool apply(Segment1 const& segment1, Segment2 const& segment2)
+    {
+        typedef typename point_type<Segment1>::type point1_type;
+        typedef typename point_type<Segment2>::type point2_type;
+
+        point1_type p[2];
+        point2_type q[2];
+
+        detail::assign_point_from_index<0>(segment1, p[0]);
+        detail::assign_point_from_index<1>(segment1, p[1]);
+        detail::assign_point_from_index<0>(segment2, q[0]);
+        detail::assign_point_from_index<1>(segment2, q[1]);
+
+        bool res = equals_point_point(p[0], q[0])
+                && equals_point_point(p[1], q[1]);
+
+        if ( Directional )
+            return res;
+        else
+            return res
+                || ( equals_point_point(p[1], q[0])
+                  && equals_point_point(p[0], q[1]) );
+    }
+};
 
 }} // namespace detail::equals
 #endif // DOXYGEN_NO_DETAIL
@@ -254,6 +282,10 @@ struct equals<Polygon, Box, polygon_tag, box_tag, 2, Reverse>
     : detail::equals::equals_by_collection<detail::equals::area_check>
 {};
 
+template <typename Segment1, typename Segment2, size_t Dimension, bool Reverse>
+struct equals<Segment1, Segment2, segment_tag, segment_tag, Dimension, Reverse>
+    : detail::equals::segment_segment<Segment1, Segment2, false>
+{};
 
 } // namespace dispatch
 #endif // DOXYGEN_NO_DISPATCH

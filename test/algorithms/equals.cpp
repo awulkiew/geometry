@@ -20,6 +20,7 @@ void test_all()
     typedef bg::model::ring<P> ring;
     typedef bg::model::polygon<P> polygon;
     typedef bg::model::linestring<P> linestring;
+    typedef bg::model::segment<P> segment;
 
     std::string case_p1 = "POLYGON((0 0,0 2,2 2,0 0))";
 
@@ -101,6 +102,8 @@ void test_all()
 //    test_geometry<linestring, linestring>("ls3", "LINESTRING(0 5,5 5,5 10,10 10,10 5,5 5,5 0)",
 //                                                 "LINESTRING(0 5,10 5,10 10,5 10,5 0)", true);
 
+    test_geometry<segment, segment>("seg1", "SEGMENT(0 0, 1 1)", "SEGMENT(0 0, 1 1)", true);
+    test_geometry<segment, segment>("seg2", "SEGMENT(0 0, 1 1)", "SEGMENT(1 1, 0 0)", true);
 }
 
 
