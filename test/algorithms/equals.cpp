@@ -10,8 +10,32 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 
+namespace bgm = bg::model;
 
+void test_equal_linestring_linestring()
+{
+    typedef bgm::point<float, 2, bg::cs::cartesian> Pt;
+    typedef bgm::linestring<Pt> L;
+    typedef bgm::point<float, 3, bg::cs::cartesian> Pt3;
+    typedef bgm::linestring<Pt3> L3;
 
+    test_geometry<L, L>("ls2d_1", "LINESTRING(1 1, 3 3)", "LINESTRING(3 3, 1 1)", true);
+    test_geometry<L, L>("ls2d_2", "LINESTRING(1 1, 3 3, 2 5)", "LINESTRING(1 1, 2 2, 3 3, 2 5)", true);
+    test_geometry<L, L>("ls2d_3", "LINESTRING(1 0, 3 3, 2 5)", "LINESTRING(1 1, 2 2, 3 3, 2 5)", false);
+    test_geometry<L, L>("ls2d_4", "LINESTRING(1 0, 3 3, 2 5)", "LINESTRING(1 1, 3 3, 2 5)", false);
+    test_geometry<L, L>("ls2d_5", "LINESTRING(0 5,5 5,10 5,10 0,5 0,5 5,5 10,10 10,15 10,15 5,10 5,10 10,10 15)",
+                                  "LINESTRING(0 5,15 5,15 10,5 10,5 0,10 0,10 15)", true);
+    test_geometry<L, L>("ls2d_6", "LINESTRING(0 5,5 5,10 5,10 10,5 10,5 5,5 0)", "LINESTRING(0 5,5 5,5 10,10 10,10 5,5 5,5 0)", true);
+    test_geometry<L, L>("ls2d_7", "LINESTRING(0 5,10 5,10 10,5 10,5 0)", "LINESTRING(0 5,5 5,5 10,10 10,10 5,5 5,5 0)", true);
+    test_geometry<L, L>("ls2d_8", "LINESTRING(0 0,5 0,5 0,6 0)", "LINESTRING(0 0,6 0)", true);
+
+    // MK:: the following test fails
+    // linestring with overlapping segments
+    // test_geometry<L, L>("ls2d_fail", "LINESTRING(0 0,5 0,3 0,6 0)", "LINESTRING(0 0,6 0)")));
+
+    test_geometry<L3, L3>("ls3d_1", "LINESTRING(1 1 1, 3 3 3)", "LINESTRING(1 1 1, 2 2 2, 3 3 3)", true);
+    test_geometry<L3, L3>("ls3d_2", "LINESTRING(1 1 1, 3 3 3)", "LINESTRING(3 3 3, 2 2 2, 1 1 1)", true);
+}
 
 template <typename P>
 void test_all()
@@ -104,6 +128,8 @@ void test_all()
 
     test_geometry<segment, segment>("seg1", "SEGMENT(0 0, 1 1)", "SEGMENT(0 0, 1 1)", true);
     test_geometry<segment, segment>("seg2", "SEGMENT(0 0, 1 1)", "SEGMENT(1 1, 0 0)", true);
+
+    test_equal_linestring_linestring();
 }
 
 

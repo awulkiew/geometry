@@ -92,8 +92,8 @@ struct area_check
     static inline bool apply(Geometry1 const& geometry1, Geometry2 const& geometry2)
     {
         return geometry::math::equals(
-                geometry::area(geometry1),
-                geometry::area(geometry2));
+                   geometry::area(geometry1),
+                   geometry::area(geometry2));
     }
 };
 
@@ -104,8 +104,47 @@ struct length_check
     static inline bool apply(Geometry1 const& geometry1, Geometry2 const& geometry2)
     {
         return geometry::math::equals(
-                geometry::length(geometry1),
-                geometry::length(geometry2));
+                   geometry::length(geometry1),
+                   geometry::length(geometry2));
+    }
+};
+
+// From util::math.hpp
+// TODO: Might be removed if there was some math::equals() function taking epsilon
+struct length_check_sqrt
+{
+    // from math::equals
+    template <typename Type>
+    static inline Type get_max(Type const& a, Type const& b, Type const& c)
+    {
+        return (std::max)((std::max)(a, b), c);
+    }
+    // from math::equals
+    template <typename Type>
+    static inline bool calculate(Type const& a, Type const& b)
+    {
+        if (a == b)
+        {
+            return true;
+        }
+
+        // See http://www.parashift.com/c++-faq-lite/newbie.html#faq-29.17,
+        // FUTURE: replace by some boost tool or boost::test::close_at_tolerance
+        return std::abs(a - b) <= ::sqrt(std::numeric_limits<Type>::epsilon()) * get_max(std::abs(a), std::abs(b), Type(1));
+    }
+    // from math::equals
+    template <typename T1, typename T2>
+    static inline bool equals(T1 const& a, T2 const& b)
+    {
+        typedef typename geometry::select_most_precise<T1, T2>::type select_type;
+        return calculate<select_type>(a, b);
+    }
+
+    template <typename Geometry1, typename Geometry2>
+    static inline bool apply(Geometry1 const& geometry1, Geometry2 const& geometry2)
+    {
+        return equals( geometry::length(geometry1),
+                       geometry::length(geometry2) );
     }
 };
 
@@ -261,7 +300,7 @@ struct equals<Polygon1, Polygon2, polygon_tag, polygon_tag, 2, Reverse>
 
 template <typename LineString1, typename LineString2, std::size_t DimensionCount, bool Reverse>
 struct equals<LineString1, LineString2, linestring_tag, linestring_tag, DimensionCount, Reverse>
-    : detail::equals::equals_by_collection<detail::equals::length_check, false>
+    : detail::equals::equals_by_collection<detail::equals::length_check_sqrt, false>
 {};
 
 

@@ -44,6 +44,9 @@ struct range_collect_vectors
 {
     typedef typename boost::range_value<Collection>::type vector_type;
 
+    // TEMP probably
+    static const bool enable_nonsimple = true;
+
     static inline void apply(Collection& collection, Range const& range)
     {
         apply_raw(collection, range, boost::mpl::bool_<vector_type::directional>());
@@ -57,9 +60,6 @@ struct range_collect_vectors
 
     static inline void apply_raw(Collection& collection, Range const& range, boost::mpl::bool_<false> /*directional*/)
     {
-        // TEMP
-        static const bool enable_nonsimple = true;
-
         if ( enable_nonsimple )
         {
             // O(NlogN)
@@ -327,17 +327,41 @@ struct polygon_collect_vectors
 };
 
 
-template <typename MultiGeometry, typename Collection, typename SinglePolicy>
+template <typename MultiGeometry,
+          typename Collection,
+          typename SinglePolicy,
+          bool Directional = boost::range_value<Collection>::type::directional>
 struct multi_collect_vectors
 {
     static inline void apply(Collection& collection, MultiGeometry const& multi)
     {
-        for (typename boost::range_iterator<MultiGeometry const>::type
-                it = boost::begin(multi);
-            it != boost::end(multi);
-            ++it)
+        typedef typename boost::range_iterator<MultiGeometry const>::type iterator;
+
+        for ( iterator it = boost::begin(multi); it != boost::end(multi); ++it )
         {
             SinglePolicy::apply(collection, *it);
+        }
+    }
+};
+
+template <typename MultiGeometry, typename Collection, typename SinglePolicy>
+struct multi_collect_vectors<MultiGeometry, Collection, SinglePolicy, false>
+{
+    static inline void apply(Collection& collection, MultiGeometry const& multi)
+    {
+        typedef typename boost::range_iterator<MultiGeometry const>::type iterator;
+        typedef typename boost::range_value<Collection>::type vector_type;
+
+        // O(NlogN)
+        segments_info<MultiGeometry, vector_type> segments(multi);
+
+        index_type ei;
+        ei.multi_index = 0;
+
+        for ( iterator it = boost::begin(multi) ; it != boost::end(multi) ;
+              ++it, ++ei.multi_index )
+        {
+            SinglePolicy::apply_nd_ns(collection, segments, *it, multi, ei);
         }
     }
 };
@@ -394,14 +418,26 @@ struct collect_vectors<multi_polygon_tag, Collection, MultiPolygon>
             MultiPolygon,
             Collection,
             detail::equals::polygon_collect_vectors
-            <
-                typename boost::range_value<MultiPolygon>::type,
-                Collection
-            >
+                <
+                    typename boost::range_value<MultiPolygon>::type,
+                    Collection
+                >
         >
 {};
 
-
+template <typename Collection, typename MultiLinestring>
+struct collect_vectors<multi_linestring_tag, Collection, MultiLinestring>
+    : detail::equals::multi_collect_vectors
+        <
+            MultiLinestring,
+            Collection,
+            detail::equals::range_collect_vectors
+                <
+                    typename boost::range_value<MultiLinestring>::type,
+                    Collection
+                >
+        >
+{};
 
 }} // namespace detail_dispatch::equals
 

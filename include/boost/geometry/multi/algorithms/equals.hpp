@@ -53,6 +53,27 @@ struct equals
     : detail::equals::equals_by_collection<detail::equals::area_check>
 {};
 
+template <typename MultiLinestring1, typename MultiLinestring2, std::size_t Dimension, bool Reverse>
+struct equals
+    <
+        MultiLinestring1, MultiLinestring2,
+        multi_linestring_tag, multi_linestring_tag,
+        Dimension,
+        Reverse
+    >
+    : detail::equals::equals_by_collection<detail::equals::length_check_sqrt, false>
+{};
+
+template <typename Linestring, typename MultiLinestring, std::size_t Dimension>
+struct equals
+    <
+        Linestring, MultiLinestring,
+        linestring_tag, multi_linestring_tag,
+        Dimension,
+        false
+    >
+    : detail::equals::equals_by_collection<detail::equals::length_check_sqrt, false>
+{};
 
 } // namespace dispatch
 #endif // DOXYGEN_NO_DISPATCH
