@@ -46,10 +46,36 @@ struct range_collect_vectors
 
     static inline void apply(Collection& collection, Range const& range)
     {
-        apply(collection, range, boost::mpl::bool_<vector_type::directional>());
+        apply_raw(collection, range, boost::mpl::bool_<vector_type::directional>());
     }
 
-    static inline void apply(Collection& collection, Range const& range, boost::mpl::bool_<true> /*directional*/)
+    static inline void apply_raw(Collection& collection, Range const& range, boost::mpl::bool_<true> /*directional*/)
+    {
+        // O(N)
+        apply_d(collection, range);
+    }
+
+    static inline void apply_raw(Collection& collection, Range const& range, boost::mpl::bool_<false> /*directional*/)
+    {
+        // TEMP
+        static const bool enable_nonsimple = true;
+
+        if ( enable_nonsimple )
+        {
+            // O(NlogN)
+            segments_info<Range, vector_type> segments(range);
+
+            // O(NlogP)
+            apply_nd_ns(collection, segments, range, range, index_type());
+        }
+        else
+        {
+            // O(N)
+            apply_nd_s(collection, range);
+        }
+    }
+
+    static inline void apply_d(Collection& collection, Range const& range)
     {
         typedef typename boost::range_iterator<Range const>::type iterator;
 
@@ -89,7 +115,8 @@ struct range_collect_vectors
         }
     }
 
-    static inline void apply(Collection& collection, Range const& range, boost::mpl::bool_<false> /*directional*/)
+    static inline void apply_nd_s(Collection& collection,
+                                  Range const& range)
     {
         typedef typename boost::range_iterator<Range const>::type iterator;
         typedef typename vector_type::origin_type origin_type;
@@ -140,6 +167,112 @@ struct range_collect_vectors
                 collection.front().origin = collection.back().origin; // CONSIDER: copy whole vector?
             }
             collection.pop_back();
+        }
+    }
+
+    template <typename Geometry>
+    static inline void apply_nd_ns(Collection & collection,
+                                   segments_info
+                                      <
+                                          Geometry,
+                                          vector_type
+                                      > & segments,
+                                   Range const& range,
+                                   Geometry const& geometry,
+                                   index_type segment_i)
+    {
+        typedef typename boost::range_iterator<Range const>::type iterator;
+        typedef typename vector_type::origin_type origin_type;
+        static const geometry::less<origin_type> origin_less;
+
+        if ( boost::size(range) < 2 )
+            return;
+
+        // to this collection vectors from subgeometries (e.g. linestrings of multilinestring)
+        // will be added therefore we must monitor the numbers of vectors in collection
+        std::size_t col_old_size = boost::size(collection);
+
+        // O(NlogP)
+        segment_i.index = 0;
+        iterator it = boost::begin(range);
+        for ( iterator prev = it++ ; it != boost::end(range) ; prev = it++, ++segment_i.index )
+        {
+            vector_type vec;
+            std::pair<bool, bool> seg_ok = segments.check_segment(vec, segment_i); // O(logP)
+            // another category of vectors can be returned - found but not connected with any other vector (vector_i < 0)
+            // it'd be already normalized
+
+            std::size_t col_size = boost::size(collection);
+            bool without_check = col_old_size == col_size;
+
+            // not found or found and available - push new vector into the collection
+            if ( !seg_ok.first || seg_ok.second )
+            {
+                bool ok = true;
+
+                // not found - create vector and normalize it
+                if ( !seg_ok.first )
+                {
+                    // NOTE: this works differently for directional and non-directional
+                    vec.from_segment(*prev, *it);
+
+                    // Normalize the vector -> this results in points+direction
+                    // and is comparible between geometries
+                    ok = vec.normalize();
+                }
+
+                // Avoid non-duplicate points (AND division by zero)
+                if ( ok )
+                {
+                    // Avoid non-direction changing points
+                    if ( without_check
+                      || ! vec.equal_direction(collection.back()) )
+                    {
+                        collection.push_back(vec);
+                    }
+                    // TODO: maybe move this to collected_vector somehow
+                    // because it already works differently for directional/non-directional (e.g.: from_segment())
+                    // maybe it would be possible to close there all differences between directional and non-directional
+                    // or remove it from collected_vector and keep it here
+                    else if ( origin_less(vec.origin, collection.back().origin) )
+                    {
+                        collection.back().origin = vec.origin; // CONSIDER: copy whole vector?
+                    }
+                }
+            }
+        }
+
+        // TODO: will the following work for polygons?
+
+        // current subgeometry
+        typename sub_geometry::result_type<Geometry const>::type
+            subg = sub_geometry::get(geometry, segment_i);
+
+        std::size_t n = geometry::num_points(subg);
+        std::size_t col_size = boost::size(collection);
+        std::size_t nv = col_size - col_old_size;
+        if ( n > 0 && nv > 0)
+        {
+            // Only if the first point is the same as the last one (closed geometry)
+            if ( equals_point_point(*(boost::begin(subg)),
+                                    *(boost::begin(subg) + (n - 1))) )
+            {
+                 vector_type & front = collection[col_old_size];
+                 vector_type & back = collection[col_size - 1];
+
+                 // If first one has the same direction as the last one, remove the first one
+                 if ( /*boost::size(collection) > 1
+                   && */front.equal_direction(back) )
+                 {
+                     //collection.erase(collection.begin());
+                     // TODO: again maybe move to collected_vector
+                     if ( origin_less(back.origin, front.origin) )
+                     {
+                         front.origin = back.origin; // CONSIDER: copy whole vector?
+                     }
+                     collection.pop_back();
+                 }
+            }
         }
     }
 };

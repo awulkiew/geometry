@@ -99,8 +99,8 @@ void test_all()
     test_geometry<linestring, linestring>("ls2", "LINESTRING(1 1,2 2)", "LINESTRING(2 2,1 1)", true);
 
     // NON-SIMPLE LINESTRINGS
-//    test_geometry<linestring, linestring>("ls3", "LINESTRING(0 5,5 5,5 10,10 10,10 5,5 5,5 0)",
-//                                                 "LINESTRING(0 5,10 5,10 10,5 10,5 0)", true);
+    test_geometry<linestring, linestring>("ls3", "LINESTRING(0 5,5 5,5 10,10 10,10 5,5 5,5 0)",
+                                                 "LINESTRING(0 5,10 5,10 10,5 10,5 0)", true);
 
     test_geometry<segment, segment>("seg1", "SEGMENT(0 0, 1 1)", "SEGMENT(0 0, 1 1)", true);
     test_geometry<segment, segment>("seg2", "SEGMENT(0 0, 1 1)", "SEGMENT(1 1, 0 0)", true);
