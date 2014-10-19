@@ -246,6 +246,7 @@
 [include generated/closing_iterator.qbk]
 [include generated/circular_iterator.qbk]
 [include generated/ever_circling_iterator.qbk]
+[include generated/point_iterator.qbk]
 [endsect] 
 
 

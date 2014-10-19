@@ -242,7 +242,15 @@ struct points_end<MultiPolygon, multi_polygon_tag>
 #endif // DOXYGEN_NO_DISPATCH
 
 
-// MK:: need to add doc here
+/*!
+\brief Iterator which iterates through points contained in Geometry
+\tparam Geometry A type of Geometry being the source of points
+\ingroup iterators
+\note I's possible to default-construct the point_iterator object and to
+        create it using points_begin() and points_end() functions.
+\note An example usage is passing it to the rtree's constructor in order to create
+        a spatial index containing all points of Geometry.
+*/
 template <typename Geometry>
 class point_iterator
     : public detail::point_iterator::iterator_type<Geometry>::type
@@ -267,6 +275,7 @@ private:
     inline point_iterator(base const& base_it) : base(base_it) {}
 
 public:
+    /// Default constructor
     inline point_iterator() {}
 
     template <typename OtherGeometry>

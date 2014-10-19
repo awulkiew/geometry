@@ -102,8 +102,10 @@ core = ["closure", "coordinate_system", "coordinate_type", "cs_tag"
 
 exceptions = ["exception", "centroid_exception"];
 
-iterators = ["circular_iterator", "closing_iterator"
+iterators_structs = ["circular_iterator", "closing_iterator"
     , "ever_circling_iterator"]
+
+iterators_classes = ["point_iterator"]
 
 models = ["point", "linestring", "box"
     , "polygon", "segment", "ring"
@@ -149,8 +151,11 @@ for i in core:
 for i in exceptions:
     class_to_quickbook(i)
 
-for i in iterators:
+for i in iterators_structs:
     struct_to_quickbook(i)
+
+for i in iterators_classes:
+    class_to_quickbook(i)
 
 for i in models:
     model_to_quickbook(i)

@@ -285,6 +285,7 @@
     <simplelist type="vert" columns="1">
     <member><link linkend="geometry.reference.iterators.closing_iterator">closing_iterator</link></member>
     <member><link linkend="geometry.reference.iterators.ever_circling_iterator">ever_circling_iterator</link></member>
+    <member><link linkend="geometry.reference.iterators.point_iterator">point_iterator</link></member>
     </simplelist>
    </entry>
    <entry valign="top">
