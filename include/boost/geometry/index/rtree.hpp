@@ -3,7 +3,7 @@
 // R-tree implementation
 //
 // Copyright (c) 2008 Federico J. Fernandez.
-// Copyright (c) 2011-2014 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2011-2015 Adam Wulkiewicz, Lodz, Poland.
 //
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -582,11 +582,94 @@ public:
     template <typename Iterator>
     inline void insert(Iterator first, Iterator last)
     {
-        if ( !m_members.root )
-            this->raw_create();
+        if ( first == last )
+            return;
 
-        for ( ; first != last ; ++first )
-            this->raw_insert(*first);
+        typedef detail::rtree::pack<value_type, options_type, translator_type, box_type, allocators_type> pack;
+        size_type values_count = 0, leafs_level = 0;
+        node_pointer root = pack::apply(first, last,
+                                        values_count, leafs_level,
+                                        m_members.parameters(),
+                                        m_members.translator(),
+                                        m_members.allocators());         // may throw
+        
+        // NOTE: root may be == 0 if a range is invalid
+        if ( !root )
+            return;
+
+        if ( !m_members.root )
+        {
+            m_members.root = root;
+            m_members.values_count = values_count;
+            m_members.leafs_level = leafs_level;
+        }
+        else
+        {
+            // own the bigger tree
+            if ( leafs_level > m_members.leafs_level
+              || ( leafs_level == m_members.leafs_level
+                && values_count > m_members.values_count ) )
+            {
+                boost::swap(m_members.values_count, values_count);
+                boost::swap(m_members.leafs_level, leafs_level);
+                boost::swap(m_members.root, root);
+            }
+
+            node_auto_ptr auto_root(root, m_members.allocators());
+
+            // source is a root leaf
+            if ( leafs_level == 0 )
+            {
+                // just insert the Values
+                for ( ; first != last ; ++first )
+                    this->raw_insert(*first);
+            }
+            // source and destination are internal nodes
+            // since destination level >= source level
+            else
+            {
+                typedef typename detail::rtree::elements_type<internal_node>::type elements_type;
+                elements_type & elements
+                    = detail::rtree::elements(
+                        detail::rtree::get<internal_node>(*root));
+
+                typename elements_type::iterator it = elements.begin();
+                BOOST_TRY
+                {
+                    for ( ; it != elements.end() ; ++it )
+                    {
+                        typedef typename boost::range_value<elements_type>::type element_type;
+
+                        detail::rtree::visitors::insert<
+                            element_type,
+                            value_type, options_type, translator_type, box_type, allocators_type,
+                            typename options_type::insert_tag
+                        > insert_v(m_members.root,
+                                   m_members.leafs_level,
+                                   *it,
+                                   m_members.parameters(), m_members.translator(), m_members.allocators(),
+                                   leafs_level);
+
+                        detail::rtree::apply_visitor(insert_v, *m_members.root);    // may throw
+                    }
+                }
+                BOOST_CATCH(...)
+                {
+                    ++it;
+                    detail::rtree::destroy_elements<value_type, options_type, translator_type, box_type, allocators_type>
+                        ::apply(it, elements.end(), m_members.allocators());
+                    elements.clear();
+                    BOOST_RETHROW                                                                                     // RETHROW
+                }
+                BOOST_CATCH_END
+
+                // clear the source root
+                elements.clear();
+
+                // update the values counter
+                m_members.values_count += values_count;
+            }
+        }
     }
 
     /*!
