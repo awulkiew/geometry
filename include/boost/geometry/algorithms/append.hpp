@@ -284,7 +284,7 @@ struct append
                              int ring_index,
                              int multi_index)
     {
-        concept::check<Geometry>();
+        concept::check_concept<Geometry>();
         dispatch::append<Geometry, RangeOrPoint>::apply(geometry,
                                                         range_or_point,
                                                         ring_index,

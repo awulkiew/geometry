@@ -542,8 +542,8 @@ template
 >
 inline void split_rings(Geometry const& geometry, RingCollection& out)
 {
-    concept::check<Geometry const>();
-    concept::check<typename boost::range_value<RingCollection>::type>();
+    concept::check_concept<Geometry const>();
+    concept::check_concept<typename boost::range_value<RingCollection>::type>();
 
     dispatch::split_rings
     <

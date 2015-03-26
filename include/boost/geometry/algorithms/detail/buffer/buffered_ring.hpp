@@ -78,7 +78,7 @@ struct buffered_ring_collection : public std::vector<Ring>
 namespace dispatch
 {
 template <typename Geometry, bool IsConst>
-struct check<Geometry, detail::buffer::buffered_ring_collection_tag, IsConst>
+struct check_concept<Geometry, detail::buffer::buffered_ring_collection_tag, IsConst>
 {
 };
 

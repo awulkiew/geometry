@@ -266,7 +266,7 @@ and Geographic as well.
 template <typename Geometry>
 inline typename default_area_result<Geometry>::type area(Geometry const& geometry)
 {
-    concept::check<Geometry const>();
+    concept::check_concept<Geometry const>();
 
     // TODO put this into a resolve_strategy stage
     //      (and take the return type from resolve_variant)
@@ -310,7 +310,7 @@ template <typename Geometry, typename Strategy>
 inline typename Strategy::return_type area(
         Geometry const& geometry, Strategy const& strategy)
 {
-    concept::check<Geometry const>();
+    concept::check_concept<Geometry const>();
 
     // detail::throw_on_empty_input(geometry);
 

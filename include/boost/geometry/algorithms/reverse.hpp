@@ -137,7 +137,7 @@ struct reverse
 {
     static void apply(Geometry& geometry)
     {
-        concept::check<Geometry>();
+        concept::check_concept<Geometry>();
         dispatch::reverse<Geometry>::apply(geometry);
     }
 };

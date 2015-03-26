@@ -88,7 +88,7 @@ struct num_interior_rings
 {
     static inline std::size_t apply(Geometry const& geometry)
     {
-        concept::check<Geometry const>();
+        concept::check_concept<Geometry const>();
 
         return dispatch::num_interior_rings<Geometry>::apply(geometry);
     }

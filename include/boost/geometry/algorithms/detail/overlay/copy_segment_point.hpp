@@ -274,7 +274,7 @@ inline bool copy_segment_point(Geometry const& geometry,
             SegmentIdentifier const& seg_id, bool second,
             PointOut& point_out)
 {
-    concept::check<Geometry const>();
+    concept::check_concept<Geometry const>();
 
     return dispatch::copy_segment_point
         <
@@ -303,8 +303,8 @@ inline bool copy_segment_point(Geometry1 const& geometry1, Geometry2 const& geom
             SegmentIdentifier const& seg_id, bool second,
             PointOut& point_out)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
 
     BOOST_ASSERT(seg_id.source_index == 0 || seg_id.source_index == 1);
 
@@ -351,8 +351,8 @@ inline bool copy_segment_points(Geometry1 const& geometry1, Geometry2 const& geo
             SegmentIdentifier const& seg_id,
             PointOut& point1, PointOut& point2)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
 
     return copy_segment_point<Reverse1, Reverse2>(geometry1, geometry2, seg_id, false, point1)
         && copy_segment_point<Reverse1, Reverse2>(geometry1, geometry2, seg_id, true,  point2);

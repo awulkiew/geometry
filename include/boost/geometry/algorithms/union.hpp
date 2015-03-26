@@ -204,9 +204,9 @@ inline OutputIterator union_insert(Geometry1 const& geometry1,
             Geometry2 const& geometry2,
             OutputIterator out)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
-    concept::check<GeometryOut>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
+    concept::check_concept<GeometryOut>();
 
     typedef typename geometry::rescale_overlay_policy_type
         <
@@ -264,11 +264,11 @@ inline void union_(Geometry1 const& geometry1,
             Geometry2 const& geometry2,
             Collection& output_collection)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
 
     typedef typename boost::range_value<Collection>::type geometry_out;
-    concept::check<geometry_out>();
+    concept::check_concept<geometry_out>();
 
     detail::union_::union_insert<geometry_out>(geometry1, geometry2,
                 std::back_inserter(output_collection));

@@ -41,16 +41,16 @@ namespace boost { namespace geometry
 
 
 #ifndef DOXYGEN_NO_DETAIL
-namespace detail { namespace concept_check
+namespace detail
 {
 
 template <typename Concept>
-class check
+class check_concept
 {
     BOOST_CONCEPT_ASSERT((Concept ));
 };
 
-}} // namespace detail::concept_check
+} // namespace detail
 #endif // DOXYGEN_NO_DETAIL
 
 
@@ -65,114 +65,114 @@ template
     typename GeometryTag = typename geometry::tag<Geometry>::type,
     bool IsConst = boost::is_const<Geometry>::type::value
 >
-struct check : not_implemented<GeometryTag>
+struct check_concept : not_implemented<GeometryTag>
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, point_tag, true>
-    : detail::concept_check::check<concept::ConstPoint<Geometry> >
+struct check_concept<Geometry, point_tag, true>
+    : detail::check_concept<concept::ConstPoint<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, point_tag, false>
-    : detail::concept_check::check<concept::Point<Geometry> >
+struct check_concept<Geometry, point_tag, false>
+    : detail::check_concept<concept::Point<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, linestring_tag, true>
-    : detail::concept_check::check<concept::ConstLinestring<Geometry> >
+struct check_concept<Geometry, linestring_tag, true>
+    : detail::check_concept<concept::ConstLinestring<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, linestring_tag, false>
-    : detail::concept_check::check<concept::Linestring<Geometry> >
+struct check_concept<Geometry, linestring_tag, false>
+    : detail::check_concept<concept::Linestring<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, ring_tag, true>
-    : detail::concept_check::check<concept::ConstRing<Geometry> >
+struct check_concept<Geometry, ring_tag, true>
+    : detail::check_concept<concept::ConstRing<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, ring_tag, false>
-    : detail::concept_check::check<concept::Ring<Geometry> >
+struct check_concept<Geometry, ring_tag, false>
+    : detail::check_concept<concept::Ring<Geometry> >
 {};
 
 template <typename Geometry>
-struct check<Geometry, polygon_tag, true>
-    : detail::concept_check::check<concept::ConstPolygon<Geometry> >
-{};
-
-
-template <typename Geometry>
-struct check<Geometry, polygon_tag, false>
-    : detail::concept_check::check<concept::Polygon<Geometry> >
+struct check_concept<Geometry, polygon_tag, true>
+    : detail::check_concept<concept::ConstPolygon<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, box_tag, true>
-    : detail::concept_check::check<concept::ConstBox<Geometry> >
+struct check_concept<Geometry, polygon_tag, false>
+    : detail::check_concept<concept::Polygon<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, box_tag, false>
-    : detail::concept_check::check<concept::Box<Geometry> >
+struct check_concept<Geometry, box_tag, true>
+    : detail::check_concept<concept::ConstBox<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, segment_tag, true>
-    : detail::concept_check::check<concept::ConstSegment<Geometry> >
+struct check_concept<Geometry, box_tag, false>
+    : detail::check_concept<concept::Box<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, segment_tag, false>
-    : detail::concept_check::check<concept::Segment<Geometry> >
+struct check_concept<Geometry, segment_tag, true>
+    : detail::check_concept<concept::ConstSegment<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, multi_point_tag, true>
-    : detail::concept_check::check<concept::ConstMultiPoint<Geometry> >
+struct check_concept<Geometry, segment_tag, false>
+    : detail::check_concept<concept::Segment<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, multi_point_tag, false>
-    : detail::concept_check::check<concept::MultiPoint<Geometry> >
+struct check_concept<Geometry, multi_point_tag, true>
+    : detail::check_concept<concept::ConstMultiPoint<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, multi_linestring_tag, true>
-    : detail::concept_check::check<concept::ConstMultiLinestring<Geometry> >
+struct check_concept<Geometry, multi_point_tag, false>
+    : detail::check_concept<concept::MultiPoint<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, multi_linestring_tag, false>
-    : detail::concept_check::check<concept::MultiLinestring<Geometry> >
+struct check_concept<Geometry, multi_linestring_tag, true>
+    : detail::check_concept<concept::ConstMultiLinestring<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, multi_polygon_tag, true>
-    : detail::concept_check::check<concept::ConstMultiPolygon<Geometry> >
+struct check_concept<Geometry, multi_linestring_tag, false>
+    : detail::check_concept<concept::MultiLinestring<Geometry> >
 {};
 
 
 template <typename Geometry>
-struct check<Geometry, multi_polygon_tag, false>
-    : detail::concept_check::check<concept::MultiPolygon<Geometry> >
+struct check_concept<Geometry, multi_polygon_tag, true>
+    : detail::check_concept<concept::ConstMultiPolygon<Geometry> >
+{};
+
+
+template <typename Geometry>
+struct check_concept<Geometry, multi_polygon_tag, false>
+    : detail::check_concept<concept::MultiPolygon<Geometry> >
 {};
 
 
@@ -192,7 +192,7 @@ namespace detail
 
 
 template <typename Geometry>
-struct checker : dispatch::check<Geometry>
+struct checker : dispatch::check_concept<Geometry>
 {};
 
 template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
@@ -213,7 +213,7 @@ struct checker<boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const>
     \ingroup concepts
 */
 template <typename Geometry>
-inline void check()
+inline void check_concept()
 {
     detail::checker<Geometry> c;
     boost::ignore_unused_variable_warning(c);
@@ -228,8 +228,8 @@ inline void check()
 template <typename Geometry1, typename Geometry2>
 inline void check_concepts_and_equal_dimensions()
 {
-    check<Geometry1>();
-    check<Geometry2>();
+    check_concept<Geometry1>();
+    check_concept<Geometry2>();
     assert_dimension_equal<Geometry1, Geometry2>();
 }
 

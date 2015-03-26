@@ -257,8 +257,8 @@ struct convex_hull_insert
     static inline OutputIterator apply(Geometry const& geometry, OutputIterator& out, Strategy const& strategy)
     {
         // Concept: output point type = point type of input geometry
-        concept::check<Geometry const>();
-        concept::check<typename point_type<Geometry>::type>();
+        concept::check_concept<Geometry const>();
+        concept::check_concept<typename point_type<Geometry>::type>();
 
         return resolve_strategy::convex_hull_insert::apply(geometry, out, strategy);
     }

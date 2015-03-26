@@ -348,8 +348,8 @@ struct transform
                              Geometry2& geometry2,
                              Strategy const& strategy)
     {
-        concept::check<Geometry1 const>();
-        concept::check<Geometry2>();
+        concept::check_concept<Geometry1 const>();
+        concept::check_concept<Geometry2>();
 
         return dispatch::transform<Geometry1, Geometry2>::apply(
             geometry1,

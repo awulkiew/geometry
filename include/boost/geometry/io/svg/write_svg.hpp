@@ -269,7 +269,7 @@ private:
 template <typename Geometry>
 inline svg_manipulator<Geometry> svg(Geometry const& geometry, std::string const& style, int size = -1)
 {
-    concept::check<Geometry const>();
+    concept::check_concept<Geometry const>();
 
     return svg_manipulator<Geometry>(geometry, style, size);
 }

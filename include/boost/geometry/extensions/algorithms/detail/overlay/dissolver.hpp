@@ -639,8 +639,8 @@ inline void dissolver(InputRange const& input_range,
 {
     typedef typename boost::range_value<InputRange>::type geometry_in;
     typedef typename boost::range_value<OutputCollection>::type geometry_out;
-    concept::check<geometry_in const>();
-    concept::check<geometry_out>();
+    concept::check_concept<geometry_in const>();
+    concept::check_concept<geometry_out>();
 
     dispatch::dissolver
     <

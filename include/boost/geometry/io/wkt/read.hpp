@@ -859,7 +859,7 @@ struct read_wkt<segment_tag, Segment>
 template <typename Geometry>
 inline void read_wkt(std::string const& wkt, Geometry& geometry)
 {
-    geometry::concept::check<Geometry>();
+    concept::check_concept<Geometry>();
     dispatch::read_wkt<typename tag<Geometry>::type, Geometry>::apply(wkt, geometry);
 }
 

@@ -54,9 +54,9 @@ inline OutputIterator difference_insert(Geometry1 const& geometry1,
             OutputIterator out,
             Strategy const& strategy)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
-    concept::check<GeometryOut>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
+    concept::check_concept<GeometryOut>();
 
     return geometry::dispatch::intersection_insert
         <
@@ -97,9 +97,9 @@ inline OutputIterator difference_insert(Geometry1 const& geometry1,
             RobustPolicy const& robust_policy,
             OutputIterator out)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
-    concept::check<GeometryOut>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
+    concept::check_concept<GeometryOut>();
 
     typedef strategy_intersection
         <
@@ -142,11 +142,11 @@ template
 inline void difference(Geometry1 const& geometry1,
             Geometry2 const& geometry2, Collection& output_collection)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
 
     typedef typename boost::range_value<Collection>::type geometry_out;
-    concept::check<geometry_out>();
+    concept::check_concept<geometry_out>();
 
     typedef typename geometry::rescale_overlay_policy_type
         <

@@ -206,9 +206,9 @@ struct distance_info
 template <typename Geometry1, typename Geometry2, typename Result>
 inline void distance_info(Geometry1 const& geometry1, Geometry2 const& geometry2, Result& result)
 {
-    concept::check<Geometry1 const>();
-    concept::check<Geometry2 const>();
-    concept::check<typename Result::point_type>();
+    concept::check_concept<Geometry1 const>();
+    concept::check_concept<Geometry2 const>();
+    concept::check_concept<typename Result::point_type>();
 
     assert_dimension_equal<Geometry1, Geometry2>();
     assert_dimension_equal<Geometry1, typename Result::point_type>();

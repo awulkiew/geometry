@@ -257,8 +257,8 @@ template
 >
 inline OutputIterator dissolve_inserter(Geometry const& geometry, OutputIterator out)
 {
-    concept::check<Geometry const>();
-    concept::check<GeometryOut>();
+    concept::check_concept<Geometry const>();
+    concept::check_concept<GeometryOut>();
 
     typedef typename geometry::rescale_policy_type
     <
@@ -285,11 +285,11 @@ template
 >
 inline void dissolve(Geometry const& geometry, Collection& output_collection)
 {
-    concept::check<Geometry const>();
+    concept::check_concept<Geometry const>();
 
     typedef typename boost::range_value<Collection>::type geometry_out;
 
-    concept::check<geometry_out>();
+    concept::check_concept<geometry_out>();
 
     dispatch::dissolve
     <

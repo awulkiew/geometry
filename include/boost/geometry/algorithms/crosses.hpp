@@ -71,8 +71,8 @@ namespace resolve_variant
               const Geometry1& geometry1,
               const Geometry2& geometry2)
         {
-            concept::check<Geometry1 const>();
-            concept::check<Geometry2 const>();
+            concept::check_concept<Geometry1 const>();
+            concept::check_concept<Geometry2 const>();
             
             return dispatch::crosses<Geometry1, Geometry2>::apply(geometry1, geometry2);
         }

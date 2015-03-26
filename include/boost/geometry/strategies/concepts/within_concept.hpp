@@ -278,7 +278,7 @@ struct check_within<box_tag, box_tag, areal_tag, Strategy>
 \ingroup concepts
 */
 template <typename FirstTag, typename SecondTag, typename CastedTag, typename Strategy>
-inline void check()
+inline void check_concept()
 {
     dispatch::check_within<FirstTag, SecondTag, CastedTag, Strategy> c;
     boost::ignore_unused_variable_warning(c);

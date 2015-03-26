@@ -258,8 +258,8 @@ inline bool selected(Geometry const& geometry,
         Point const& selection_point,
         RadiusType const& search_radius)
 {
-    concept::check<Geometry const>();
-    concept::check<Point const>();
+    concept::check_concept<Geometry const>();
+    concept::check_concept<Point const>();
 
     typedef dispatch::selected
         <

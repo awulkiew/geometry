@@ -140,8 +140,8 @@ inline void offset(Geometry const& geometry, GeometryOut& out,
             JoinStrategy const& join_strategy,
             Distance const& distance)
 {
-    concept::check<Geometry const>();
-    concept::check<GeometryOut>();
+    concept::check_concept<Geometry const>();
+    concept::check_concept<GeometryOut>();
 
     typedef typename geometry::point_type<Geometry>::type point_type;
 

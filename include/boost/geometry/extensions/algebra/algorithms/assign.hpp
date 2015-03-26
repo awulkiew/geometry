@@ -82,7 +82,7 @@ struct assign_identity<rotation_matrix_tag, R>
 template <typename Rotation>
 inline void assign_identity(Rotation & rotation)
 {
-    concept::check<Rotation>();
+    concept::check_concept<Rotation>();
 
     dispatch::assign_identity<
         typename tag<Rotation>::type,

@@ -29,13 +29,13 @@ namespace dispatch
 {
 
 template <typename Geometry>
-struct check<Geometry, nsphere_tag, true>
-    : detail::concept_check::check<concept::ConstNsphere<Geometry> >
+struct check_concept<Geometry, nsphere_tag, true>
+    : detail::check_concept<concept::ConstNsphere<Geometry> >
 {};
 
 template <typename Geometry>
-struct check<Geometry, nsphere_tag, false>
-    : detail::concept_check::check<concept::Nsphere<Geometry> >
+struct check_concept<Geometry, nsphere_tag, false>
+    : detail::check_concept<concept::Nsphere<Geometry> >
 {};
 
 } // namespace dispatch

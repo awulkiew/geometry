@@ -312,7 +312,7 @@ struct collect_vectors<multi_polygon_tag, Collection, MultiPolygon>
 template <typename Collection, typename Geometry>
 inline void collect_vectors(Collection& collection, Geometry const& geometry)
 {
-    concept::check<Geometry const>();
+    concept::check_concept<Geometry const>();
 
     dispatch::collect_vectors
         <

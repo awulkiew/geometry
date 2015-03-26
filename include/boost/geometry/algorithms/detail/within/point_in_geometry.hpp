@@ -398,7 +398,7 @@ namespace detail { namespace within {
 template <typename Point, typename Geometry, typename Strategy>
 inline int point_in_geometry(Point const& point, Geometry const& geometry, Strategy const& strategy)
 {
-    concept::within::check
+    concept::within::check_concept
         <
             typename tag<Point>::type,
             typename tag<Geometry>::type,

@@ -71,6 +71,6 @@ template <> struct access<rw_point, 1>
 
 int main()
 {
-    boost::geometry::concept::check<const ro_point>();
-    boost::geometry::concept::check<rw_point>();
+    boost::geometry::concept::check_concept<const ro_point>();
+    boost::geometry::concept::check_concept<rw_point>();
 }
