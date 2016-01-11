@@ -182,31 +182,38 @@ void test_areal()
                 case_59[0], case_59[2], 1, 1, 14, 17.20833);
 
     test_one<Polygon, Polygon, Polygon>("80",
-                case_80[0], case_80[1], 1, 2, 18, 221.369);
+                case_80[0], case_80[1], 2, 2, 18, 129.0);
+
+    test_one<Polygon, Polygon, Polygon>("80m",
+                case_80m[0], case_80m[1], 1, 2, 18, 221.369);
+    test_one<Polygon, Polygon, Polygon>("81m",
+                case_81m[0], case_81m[1], 1, 1, 10, 147.5);
+    test_one<Polygon, Polygon, Polygon>("82m",
+                case_82m[0], case_82m[1], 2, 0, 9, 175);
+    test_one<Polygon, Polygon, Polygon>("83m",
+                case_83m[0], case_83m[1], 1, 2, 13, 172.917);
+    test_one<Polygon, Polygon, Polygon>("84m",
+                case_84m[0], case_84m[1], 2, 0, 11, 170);
+    test_one<Polygon, Polygon, Polygon>("85m",
+                case_85m[0], case_85m[1], 1, 2, 15, 1320);
+    test_one<Polygon, Polygon, Polygon>("86m",
+                case_86m[0], case_86m[1], 1, 1, 10, 1500);
+
     test_one<Polygon, Polygon, Polygon>("81",
-                case_81[0], case_81[1], 1, 1, 10, 147.5);
-    test_one<Polygon, Polygon, Polygon>("82",
-                case_82[0], case_82[1], 2, 0, 9, 175);
-    test_one<Polygon, Polygon, Polygon>("83",
-                case_83[0], case_83[1], 1, 2, 13, 172.917);
-    test_one<Polygon, Polygon, Polygon>("84",
-                case_84[0], case_84[1], 2, 0, 11, 170);
-    test_one<Polygon, Polygon, Polygon>("85",
-                case_85[0], case_85[1], 1, 2, 15, 1320);
-    test_one<Polygon, Polygon, Polygon>("86",
-                case_86[0], case_86[1], 1, 1, 10, 1500);
+                case_81[0], case_81[1], 1, 2, 15, 163.5);
 
-    test_one<Polygon, Polygon, Polygon>("97",
-                case_97[0], case_97[1], 1, 1, 17, 127.6875598);
-    test_validity<Polygon, Polygon, Polygon>("97", case_97[0], case_97[1]);
 
-    test_one<Polygon, Polygon, Polygon>("98",
-                case_98[0], case_98[1], 1, 2, 23, 155.2452558);
-    test_validity<Polygon, Polygon, Polygon>("98", case_98[0], case_98[1]);
+    test_one<Polygon, Polygon, Polygon>("97m",
+                case_97m[0], case_97m[1], 1, 1, 17, 127.6875598);
+    test_validity<Polygon, Polygon, Polygon>("97m", case_97m[0], case_97m[1]);
 
-    test_one<Polygon, Polygon, Polygon>("103",
-                case_103[0], case_103[1], 1, 0, 10, 64.072499);
-    test_validity<Polygon, Polygon, Polygon>("103", case_103[0], case_103[1]);
+    test_one<Polygon, Polygon, Polygon>("98m",
+                case_98m[0], case_98m[1], 1, 2, 23, 155.2452558);
+    test_validity<Polygon, Polygon, Polygon>("98m", case_98m[0], case_98m[1]);
+
+    test_one<Polygon, Polygon, Polygon>("103m",
+                case_103m[0], case_103m[1], 1, 0, 10, 64.072499);
+    test_validity<Polygon, Polygon, Polygon>("103m", case_103m[0], case_103m[1]);
 
     /*
     test_one<Polygon, Polygon, Polygon>(102,
@@ -268,16 +275,20 @@ void test_areal()
         67.3550722317627);
 #endif
 
+    {
+        ut_settings settings;
+        settings.percentage = 0.1;
 
-    test_one<Polygon, Polygon, Polygon>("isovist",
-        isovist1[0], isovist1[1],
-        1,
-        0,
-        -1,
-        313.36036462, 0.1);
+        test_one<Polygon, Polygon, Polygon>("isovist",
+            isovist1[0], isovist1[1],
+            1,
+            0,
+            -1,
+            313.36036462, settings);
 
-    // SQL Server gives: 313.360374193241
-    // PostGIS gives:    313.360364623393
+        // SQL Server gives: 313.360374193241
+        // PostGIS gives:    313.360364623393
+    }
 
     // Ticket 5103 https://svn.boost.org/trac/boost/ticket/5103
     // This ticket was actually reported for Boost.Polygon
@@ -287,10 +298,13 @@ void test_areal()
     // Boost.Geometry gives: 2515271327070.5237746891 (ttmath)
     //                       2515271327070.5156 (double)
     //                       2515271320603.0000 (int)
-    // Note the int-test was tested outside of this unit test. It is in two points 0.37 off (logical for an int).
-    // Because of the width of the polygon (400000 meter) this causes a substantial difference.
+    // Note the int-test was tested outside of this unit test.
+    // It is in two points 0.37 off (logical for an int).
+    // Because of the width of the polygon (400000 meter)
+    // this causes a substantial difference.
 
-    test_one<Polygon, Polygon, Polygon>("ticket_5103", ticket_5103[0], ticket_5103[1],
+    test_one<Polygon, Polygon, Polygon>("ticket_5103",
+                ticket_5103[0], ticket_5103[1],
                 1, 0, 25, 2515271327070.5);
 
     test_one<Polygon, Polygon, Polygon>("ticket_8310a", ticket_8310a[0], ticket_8310a[1],
@@ -403,6 +417,22 @@ void test_areal()
 
     test_one<Polygon, Polygon, Polygon>("buffer_mp2", buffer_mp2[0], buffer_mp2[1],
                 1, 0, 217, 36.752837);
+
+#ifdef BOOST_GEOMETRY_TEST_INCLUDE_FAILING_TESTS
+    test_one<Polygon, Polygon, Polygon>("ticket_11725",
+        ticket_11725[0], ticket_11725[1],
+        1, 1, -1, 7.5);
+#endif
+
+    test_one<Polygon, Polygon, Polygon>("mysql_21964079_1",
+        mysql_21964079_1[0], mysql_21964079_1[1],
+        2, 1, -1, 234.5);
+    test_one<Polygon, Polygon, Polygon>("mysql_21964079_2",
+        mysql_21964079_2[0], mysql_21964079_2[1],
+        2, 1, -1, 112.0);
+    test_one<Polygon, Polygon, Polygon>("mysql_21964049",
+        mysql_21964049[0], mysql_21964049[1],
+        1, 1, -1, 220.5);
 }
 
 template <typename P>

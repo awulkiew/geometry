@@ -324,72 +324,99 @@ void test_areal()
     test_one<Polygon, Polygon, Polygon>("buffer_mp2", buffer_mp2[0], buffer_mp2[1],
                 1, 29, 0.457126);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case87",
-        case_87[0], case_87[1],
+    test_one<Polygon, Polygon, Polygon>("case_58_iet",
+        case_58[0], case_58[2],
+        2, -1, 1.0 / 3.0);
+
+    test_one<Polygon, Polygon, Polygon>("case_80",
+        case_80[0], case_80[1],
+        0, -1, 0.0);
+
+    test_one<Polygon, Polygon, Polygon>("case_81",
+        case_81[0], case_81[1],
+        0, -1, 0.0);
+
+    test_one<Polygon, Polygon, Polygon>("mysql_21964049",
+        mysql_21964049[0], mysql_21964049[1],
+        0, -1, 0.0);
+
+    test_one<Polygon, Polygon, Polygon>("mysql_21964465",
+        mysql_21964465[0], mysql_21964465[1],
+        0, -1, 0.0);
+
+#ifdef BOOST_GEOMETRY_TEST_INCLUDE_FAILING_TESTS
+    test_one<Polygon, Polygon, Polygon>("mysql_21965285_b_inv",
+        mysql_21965285_b_inv[0],
+        mysql_21965285_b_inv[1],
+        2, -1, 183.71376870369406);
+#endif
+
+
+    test_one_with_holes<Polygon, Polygon, Polygon>("case87m",
+        case_87m[0], case_87m[1],
         1, 1, 11, 54.70134);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case88",
-        case_88[0], case_88[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case88m",
+        case_88m[0], case_88m[1],
         1, 1, 13, 35.933385);
 
 #ifdef BOOST_GEOMETRY_INCLUDE_FAILING_TESTS
-    test_one_with_holes<Polygon, Polygon, Polygon>("case89",
-        case_89[0], case_89[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case89m",
+        case_89m[0], case_89m[1],
         2, 0, 13, 390);
 #endif // BOOST_GEOMETRY_INCLUDE_FAILING_TESTS
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case90",
-        case_90[0], case_90[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case90m",
+        case_90m[0], case_90m[1],
         2, 0, 13, 143.067882);
-    test_validity<Polygon, Polygon, Polygon>("case90", case_90[0], case_90[1]);
+    test_validity<Polygon, Polygon, Polygon>("case90m", case_90m[0], case_90m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case91",
-        case_91[0], case_91[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case91m",
+        case_91m[0], case_91m[1],
         3, 0, 13, 216.6667);
-    test_validity<Polygon, Polygon, Polygon>("case91", case_91[0], case_91[1]);
+    test_validity<Polygon, Polygon, Polygon>("case91m", case_91m[0], case_91m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case92",
-        case_92[0], case_92[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case92m",
+        case_92m[0], case_92m[1],
         2, 0, 13, 633.3333);
-    test_validity<Polygon, Polygon, Polygon>("case92", case_92[0], case_92[1]);
+    test_validity<Polygon, Polygon, Polygon>("case92m", case_92m[0], case_92m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case93",
-        case_93[0], case_93[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case93m",
+        case_93m[0], case_93m[1],
         3, 0, 17, 231.42857);
-    test_validity<Polygon, Polygon, Polygon>("case93", case_93[0], case_93[1]);
+    test_validity<Polygon, Polygon, Polygon>("case93m", case_93m[0], case_93m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case94",
-        case_94[0], case_94[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case94m",
+        case_94m[0], case_94m[1],
         2, 1, 16, 645.71429);
-    test_validity<Polygon, Polygon, Polygon>("case94", case_94[0], case_94[1]);
+    test_validity<Polygon, Polygon, Polygon>("case94m", case_94m[0], case_94m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case95",
-        case_95[0], case_95[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case95m",
+        case_95m[0], case_95m[1],
         3, 0, 16, 226.66667);
-    test_validity<Polygon, Polygon, Polygon>("case95", case_95[0], case_95[1]);
+    test_validity<Polygon, Polygon, Polygon>("case95m", case_95m[0], case_95m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case96",
-        case_96[0], case_96[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case96m",
+        case_96m[0], case_96m[1],
         4, 0, 19, 221.42857);
-    test_validity<Polygon, Polygon, Polygon>("case96", case_96[0], case_96[1]);
+    test_validity<Polygon, Polygon, Polygon>("case96m", case_96m[0], case_96m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case97",
-        case_97[0], case_97[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case97m",
+        case_97m[0], case_97m[1],
         2, 0, 10, 11.81244);
-    test_validity<Polygon, Polygon, Polygon>("case97", case_97[0], case_97[1]);
+    test_validity<Polygon, Polygon, Polygon>("case97m", case_97m[0], case_97m[1]);
 
-    test_one_with_holes<Polygon, Polygon, Polygon>("case98",
-        case_98[0], case_98[1],
+    test_one_with_holes<Polygon, Polygon, Polygon>("case98m",
+        case_98m[0], case_98m[1],
         2, 0, 10, 17.754744);
-    test_validity<Polygon, Polygon, Polygon>("case98", case_98[0], case_98[1]);
+    test_validity<Polygon, Polygon, Polygon>("case98m", case_98m[0], case_98m[1]);
     return;
 
-
     test_one<Polygon, Polygon, Polygon>(
-            "polygon_pseudo_line",
-            "Polygon((0 0,0 4,4 4,4 0,0 0))",
-            "Polygon((2 -2,2 -1,2 6,2 -2))",
-            5, 22, 1.1901714);
+        "polygon_pseudo_line",
+        "Polygon((0 0,0 4,4 4,4 0,0 0))",
+        "Polygon((2 -2,2 -1,2 6,2 -2))",
+        5, 22, 1.1901714);
 }
 
 template <typename Polygon, typename Box>
