@@ -3,9 +3,8 @@
 
 // Copyright (c) 2010-2015 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2015.
-// Modifications copyright (c) 2015, Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2015, 2016.
+// Modifications copyright (c) 2015-2016, Oracle and/or its affiliates.
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -177,29 +176,22 @@ void test_all()
             8, 36, 2.43452380952381,
             7, 33, 3.18452380952381);
 
-#ifdef BOOST_GEOMETRY_TEST_INCLUDE_FAILING_TESTS
-    // Fails, a-b is partly generated, b-a does not have any output
-    // It failed already in 1.59
     test_one<polygon, polygon, polygon>("case_58_iet",
         case_58[0], case_58[2],
-        3, 12, 0.6666666667,
-        1, -1, 11.1666666667);
-#endif
+        3, 3, 12, 0.6666666667,
+        1, 2, -1, 11.1666666667,
+        1, 4, -1, 12.1666666667);
 
     test_one<polygon, polygon, polygon>("case_80",
         case_80[0], case_80[1],
         1, 9, 44.5,
         1, 10, 84.5);
 
-#ifdef BOOST_GEOMETRY_TEST_INCLUDE_FAILING_TESTS
-    // Fails, holes are not subtracted
     test_one<polygon, polygon, polygon>("case_81",
         case_81[0], case_81[1],
-        1, 8, 80.5,
-        1, 8, 83.0,
-        1, 12, 80.5 + 83.0);
-#endif
-
+        1, 2, -1, 80.5,
+        1, 2, -1, 83.0,
+        1, 3, -1, 80.5 + 83.0);
 
     test_one<polygon, polygon, polygon>(
             "case97m", case_97m[0], case_97m[1],
@@ -430,6 +422,12 @@ void test_all()
             1, 5, 1342.65795);
 #endif
 
+    test_one<polygon, polygon, polygon>("ticket_11725",
+        ticket_11725[0], ticket_11725[1],
+        1, -1, 3.0,
+        1, -1, 4.5,
+        1, -1, 7.5);
+
     // From assemble-test, with a u/u case
     test_one<polygon, polygon, polygon>("assemble_0210",
             "POLYGON((0 0,0 10,10 10,10 0,0 0),(8.5 1,9.5 1,9.5 2,8.5 2,8.5 1))",
@@ -497,20 +495,52 @@ void test_all()
             5, 27, 1.6701714);
     ***/
 
-#ifdef BOOST_GEOMETRY_TEST_INCLUDE_FAILING_TESTS
-    test_one<polygon, polygon, polygon>("ticket_11725_2",
-        ticket_11725_2[0], ticket_11725_2[1],
-        2, -1, 7.5, 0, -1, 0.0);
     test_one<polygon, polygon, polygon>("mysql_21977775",
         mysql_21977775[0], mysql_21977775[1],
         2, -1, 160.856568913, 2, -1, 92.3565689126);
-#endif
 
+    // also mysql_23023665
     test_one<polygon, polygon, polygon>("mysql_21965285",
         mysql_21965285[0], mysql_21965285[1],
-        1, -1, 92.0,
-        1, -1, 14.0,
-        1, -1, 92.0 + 14.0);
+        1, 2, -1, 92.0,
+        1, 1, -1, 14.0,
+        1, 2, -1, 92.0 + 14.0);
+
+    test_one<polygon, polygon, polygon>("mysql_23023665_1",
+        mysql_23023665_1[0], mysql_23023665_1[1],
+        1, 2, -1, 92.0,
+        1, 1, -1, 142.5);
+
+    test_one<polygon, polygon, polygon>("mysql_23023665_2",
+        mysql_23023665_2[0], mysql_23023665_2[1],
+        1, 2, -1, 96.0,
+        1, 1, -1, 16.0);
+
+    test_one<polygon, polygon, polygon>("mysql_23023665_3",
+        mysql_23023665_3[0], mysql_23023665_3[1],
+        1, 2, -1, 225.0,
+        1, 1, -1, 66.0);
+
+    test_one<polygon, polygon, polygon>("mysql_23023665_4",
+        mysql_23023665_4[0], mysql_23023665_4[1],
+        1, 1, -1, 1.5,
+        1, 2, -1, 219.0,
+        1, 2, -1, 1.5 + 219.0);
+
+    test_one<polygon, polygon, polygon>("mysql_23023665_5",
+        mysql_23023665_5[0], mysql_23023665_5[1],
+        2, 2, -1, 165.23735,
+        2, 2, -1, 105.73735);
+
+    test_one<polygon, polygon, polygon>("mysql_23023665_6",
+        mysql_23023665_6[0], mysql_23023665_6[1],
+        2, 2, -1, 105.68756,
+        3, 3, -1, 10.18756);
+
+    test_one<polygon, polygon, polygon>("mysql_23023665_13",
+        mysql_23023665_13[0], mysql_23023665_13[1],
+        3, 3, -1, 99.74526,
+        3, 3, -1, 37.74526);
 }
 
 

@@ -101,7 +101,7 @@ inline OutputIterator difference_insert(Geometry1 const& geometry1,
     concept::check<Geometry2 const>();
     concept::check<GeometryOut>();
 
-    typedef strategy_intersection
+    typedef intersection_strategies
         <
             typename cs_tag<GeometryOut>::type,
             Geometry1,
@@ -159,7 +159,7 @@ inline void difference(Geometry1 const& geometry1,
 
     detail::difference::difference_insert<geometry_out>(
             geometry1, geometry2, robust_policy,
-            std::back_inserter(output_collection));
+            range::back_inserter(output_collection));
 }
 
 
