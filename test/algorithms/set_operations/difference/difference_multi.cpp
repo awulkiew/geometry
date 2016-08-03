@@ -10,19 +10,6 @@
 #include <iostream>
 #include <string>
 
-// If defined, tests are run without rescaling-to-integer or robustness policy
-// This multi_difference currently contains no tests for double which then fail
-// #define BOOST_GEOMETRY_NO_ROBUSTNESS
-
-//#define HAVE_TTMATH
-//#define BOOST_GEOMETRY_DEBUG_ASSEMBLE
-//#define BOOST_GEOMETRY_CHECK_WITH_SQLSERVER
-
-//#define BOOST_GEOMETRY_DEBUG_SEGMENT_IDENTIFIER
-//#define BOOST_GEOMETRY_DEBUG_FOLLOW
-//#define BOOST_GEOMETRY_DEBUG_TRAVERSE
-
-
 #include "test_difference.hpp"
 #include <algorithms/test_overlay.hpp>
 #include <algorithms/overlay/multi_overlay_cases.hpp>
@@ -39,6 +26,14 @@
 template <typename Ring, typename Polygon, typename MultiPolygon>
 void test_areal()
 {
+    ut_settings ignore_validity;
+    ignore_validity.test_validity = false;
+
+    ut_settings sym_settings;
+#if defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
+    sym_settings.sym_difference = false;
+#endif
+
     test_one<Polygon, MultiPolygon, MultiPolygon>("simplex_multi",
             case_multi_simplex[0], case_multi_simplex[1],
             5, 21, 5.58, 4, 17, 2.58);
@@ -79,9 +74,8 @@ void test_areal()
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_72_multi",
         case_72_multi[0], case_72_multi[1],
-            3, 13, 1.65, 3, 17, 6.15);
+            3, 13, 1.65, 3, 17, 6.15, ignore_validity);
 
-    // 77_b, fixed by sorting colocated ix/ix turns like ux/ux
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_77_multi",
         case_77_multi[0], case_77_multi[1],
             6, 31, 7.0,
@@ -91,6 +85,21 @@ void test_areal()
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_78_multi",
         case_78_multi[0], case_78_multi[1],
             1, 5, 1.0, 1, 5, 1.0);
+
+    {
+        ut_settings settings;
+
+#if !defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
+        settings.sym_difference = false;
+#endif
+
+        test_one<Polygon, MultiPolygon, MultiPolygon>("case_108_multi",
+            case_108_multi[0], case_108_multi[1],
+                7, 32, 5.5,
+                4, 28, 9.75,
+                7, 45, 15.25,
+                settings);
+    }
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_110m_multi",
         case_110m_multi[0], case_110m_multi[1],
@@ -124,10 +133,16 @@ void test_areal()
         ggl_list_20120915_h2[0], ggl_list_20120915_h2[2],
             2, 13, 17.0, 0, 0, 0.0);
 
-    test_one<Polygon, MultiPolygon, MultiPolygon>("ggl_list_20120221_volker",
-        ggl_list_20120221_volker[0], ggl_list_20120221_volker[1],
-            2, 12, 7962.66, 2, 18, 2775258.93,
-            tolerance(0.001));
+    {
+        ut_settings settings;
+        settings.percentage = 0.001;
+        settings.test_validity = false;
+
+        test_one<Polygon, MultiPolygon, MultiPolygon>("ggl_list_20120221_volker",
+            ggl_list_20120221_volker[0], ggl_list_20120221_volker[1],
+                2, 12, 7962.66, 1, 18, 2775258.93,
+                settings);
+    }
 
 #if ! defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
     test_one<Polygon, MultiPolygon, MultiPolygon>("ticket_9081",
@@ -135,31 +150,21 @@ void test_areal()
             2, 28, 0.0907392476356186, 4, 25, 0.126018011439877,
             4, 42, 0.0907392476356186 + 0.126018011439877,
             tolerance(0.001));
+
+    // POSTGIS areas: 3.75893745345145, 2.5810000723917e-15
+    test_one<Polygon, MultiPolygon, MultiPolygon>("bug_21155501",
+        bug_21155501[0], bug_21155501[1],
+            1, 9, 3.758937,
+            0, 0, 0.0,
+            ignore_validity);
 #endif
-
-    {
-        // Bug 21155501
-
-        // POSTGIS areas: 3.75893745345145, 2.5810000723917e-15
-
-        ut_settings settings;
-#ifdef BOOST_GEOMETRY_TEST_INCLUDE_FAILING_TESTS
-        settings.test_validity = true;
-#endif
-        test_one<Polygon, MultiPolygon, MultiPolygon>("bug_21155501",
-            bug_21155501[0], bug_21155501[1],
-                1, 9, 3.758937,
-                0, 0, 0.0,
-                settings);
-
-    }
 
     // Areas and #clips correspond with POSTGIS (except sym case)
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_101_multi",
         case_101_multi[0], case_101_multi[1],
             5, 23, 4.75,
             5, 40, 12.75,
-            4, 48, 4.75 + 12.75);
+            5, 48, 4.75 + 12.75);
 
     // Areas and #clips correspond with POSTGIS
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_102_multi",
@@ -168,7 +173,7 @@ void test_areal()
             6, 25, 3.75,
             6, 27, 0.75 + 3.75);
 
-    // Areas and #clips correspond with POSTGIS (except sym case)
+    // Areas and #clips correspond with POSTGIS
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_107_multi",
         case_107_multi[0], case_107_multi[1],
             2, 11, 2.25,
@@ -194,7 +199,7 @@ void test_areal()
         case_recursive_boxes_3[0], case_recursive_boxes_3[1],
             24, -1, 21.5,
             25, -1, 22.5,
-            33, -1, 44.0); // #clips should be greater
+            37, -1, 44.0);
 
     // 4, input is not valid
 
@@ -238,13 +243,14 @@ void test_areal()
         case_recursive_boxes_11[0], case_recursive_boxes_11[1],
             3, -1, 2.5,
             3, -1, 4.5,
-            2, -1, 7.0);
+            3, -1, 7.0);
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("mysql_21965285_b",
         mysql_21965285_b[0],
         mysql_21965285_b[1],
         2, -1, 183.71376870369406,
-        2, -1, 131.21376870369406);
+        2, -1, 131.21376870369406,
+        sym_settings);
 }
 
 
@@ -270,6 +276,7 @@ void test_specific()
 
         ut_settings settings;
         settings.sym_difference = false;
+        settings.test_validity = false;
 #ifdef BOOST_GEOMETRY_TEST_INCLUDE_FAILING_TESTS
         settings.test_validity = true;
         settings.sym_difference = true;

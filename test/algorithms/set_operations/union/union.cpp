@@ -19,10 +19,6 @@
 #include <iostream>
 #include <string>
 
-// If defined, tests are run without rescaling-to-integer or robustness policy
-// Test which would fail then are disabled automatically
-// #define BOOST_GEOMETRY_NO_ROBUSTNESS
-
 #include "test_union.hpp"
 #include <algorithms/test_overlay.hpp>
 
@@ -35,6 +31,9 @@ template <typename Ring, typename Polygon>
 void test_areal()
 {
     typedef typename bg::coordinate_type<Polygon>::type ct;
+
+    ut_settings ignore_validity;
+    ignore_validity.test_validity = false;
 
     test_one<Polygon, Polygon, Polygon>("simplex_normal",
         simplex_normal[0], simplex_normal[1],
@@ -257,6 +256,9 @@ void test_areal()
                 case_103m[0], case_103m[1], 1, 0, 10, 64.072499);
     test_validity<Polygon, Polygon, Polygon>("103m", case_103m[0], case_103m[1]);
 
+    test_one<Polygon, Polygon, Polygon>("100",
+                case_100[0], case_100[1], 1, 1, 13, 19.125);
+
     /*
     test_one<Polygon, Polygon, Polygon>(102,
         simplex_normal[0], simplex_reversed[1],
@@ -320,6 +322,9 @@ void test_areal()
     {
         ut_settings settings;
         settings.percentage = 0.1;
+#if defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
+        settings.test_validity = false;
+#endif
 
         test_one<Polygon, Polygon, Polygon>("isovist",
             isovist1[0], isovist1[1],
@@ -360,23 +365,21 @@ void test_areal()
             ticket_9081_15[0], ticket_9081_15[1],
             1, 0, 10, 0.0403425433);
 
-#if ! defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
     test_one<Polygon, Polygon, Polygon>("ticket_9563", ticket_9563[0], ticket_9563[1],
             1, 0, 13, 150.0);
-#endif
 
     test_one<Polygon, Polygon, Polygon>("ticket_9756", ticket_9756[0], ticket_9756[1],
             1, 0, 10, 1289.08374);
 
 #if defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
-    // The number of clips is reversed here
     test_one<Polygon, Polygon, Polygon>("ticket_10108_a", ticket_10108_a[0], ticket_10108_a[1],
             1, 0, 8, 0.0435229);
-    test_one<Polygon, Polygon, Polygon>("ticket_10108_b", ticket_10108_b[0], ticket_10108_b[1],
-            2, 0, 10, 2424.3449);
 #else
     test_one<Polygon, Polygon, Polygon>("ticket_10108_a", ticket_10108_a[0], ticket_10108_a[1],
             2, 0, 8, 0.0435229);
+#endif
+
+#if ! defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
     test_one<Polygon, Polygon, Polygon>("ticket_10108_b", ticket_10108_b[0], ticket_10108_b[1],
             1, 0, 10, 2424.3449);
 #endif
@@ -388,7 +391,8 @@ void test_areal()
             1, 1, 10, 7.5);
 
     test_one<Polygon, Polygon, Polygon>("geos_1", geos_1[0], geos_1[1],
-            1, 0, -1, 3461.3203125);
+            1, 0, -1, 3461.3203125,
+            ignore_validity);
     test_one<Polygon, Polygon, Polygon>("geos_2", geos_2[0], geos_2[1],
             1, 0, -1, 350.55102539);
     test_one<Polygon, Polygon, Polygon>("geos_3", geos_3[0], geos_3[1],
@@ -402,9 +406,11 @@ void test_areal()
     // Robustness issues, followed out buffer-robustness-tests, test them also reverse
 #if ! defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
     test_one<Polygon, Polygon, Polygon>("buffer_rt_f", buffer_rt_f[0], buffer_rt_f[1],
-                1, 0, if_typed<ct, double>(18, 23), 4.60853);
+                1, 0, if_typed<ct, double>(18, 23), 4.60853,
+                ignore_validity);
     test_one<Polygon, Polygon, Polygon>("buffer_rt_f_rev", buffer_rt_f[1], buffer_rt_f[0],
-                1, 0, if_typed<ct, double>(18, 23), 4.60853);
+                1, 0, if_typed<ct, double>(18, 23), 4.60853,
+                ignore_validity);
 #endif
 
     test_one<Polygon, Polygon, Polygon>("buffer_rt_g", buffer_rt_g[0], buffer_rt_g[1],
@@ -464,7 +470,11 @@ void test_areal()
                 1, 0, if_typed_tt<ct>(93, 91), 22.815);
 
     test_one<Polygon, Polygon, Polygon>("buffer_mp2", buffer_mp2[0], buffer_mp2[1],
+#if defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
+                1, 0, 217, 36.752837, ignore_validity);
+#else
                 1, 1, 217, 36.752837);
+#endif
 
     test_one<Polygon, Polygon, Polygon>("mysql_21964079_1",
         mysql_21964079_1[0], mysql_21964079_1[1],
@@ -472,9 +482,7 @@ void test_areal()
     test_one<Polygon, Polygon, Polygon>("mysql_21964079_2",
         mysql_21964079_2[0], mysql_21964079_2[1],
         2, 1, -1, 112.0);
-    test_one<Polygon, Polygon, Polygon>("mysql_21964049",
-        mysql_21964049[0], mysql_21964049[1],
-        1, 1, -1, 220.5);
+
     test_one<Polygon, Polygon, Polygon>("mysql_23023665_1",
         mysql_23023665_1[0], mysql_23023665_1[1],
         2, 1, -1, 92.0 + 142.5);
@@ -484,6 +492,9 @@ void test_areal()
     test_one<Polygon, Polygon, Polygon>("mysql_23023665_3",
         mysql_23023665_3[0], mysql_23023665_3[1],
         2, 1, -1, 225.0 + 66.0);
+    test_one<Polygon, Polygon, Polygon>("mysql_21964049",
+        mysql_21964049[0], mysql_21964049[1],
+        1, 1, -1, 220.5);
     test_one<Polygon, Polygon, Polygon>("mysql_23023665_4",
         mysql_23023665_4[0], mysql_23023665_4[1],
         1, 1, -1, 1.5 + 219.0);

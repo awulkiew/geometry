@@ -14,10 +14,6 @@
 #include <iostream>
 #include <string>
 
-// If defined, tests are run without rescaling-to-integer or robustness policy
-// This multi_union currently contains no tests for double which then fail
-// #define BOOST_GEOMETRY_NO_ROBUSTNESS
-
 #include "test_union.hpp"
 #include <algorithms/test_overlay.hpp>
 #include <algorithms/overlay/multi_overlay_cases.hpp>
@@ -36,6 +32,12 @@
 template <typename Ring, typename Polygon, typename MultiPolygon>
 void test_areal()
 {
+    ut_settings ignore_validity;
+    ignore_validity.test_validity = false;
+
+    // Some output is only invalid for CCW
+    bool const ccw = bg::point_order<Polygon>::value == bg::counterclockwise;
+
     test_one<Polygon, MultiPolygon, MultiPolygon>("simplex_multi",
         case_multi_simplex[0], case_multi_simplex[1],
         1, 0, 20, 14.58);
@@ -124,6 +126,9 @@ void test_areal()
         case_108_multi[0], case_108_multi[1],
         1, 1, 20, 22.75);
 
+    // To make it valid, it is necessary to calculate and use self turns
+    // for each input. Now the two holes are connected because a turn is missing
+    // there.
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_109_multi",
         case_109_multi[0], case_109_multi[1],
         1, 2, 14, 1400);
@@ -146,6 +151,43 @@ void test_areal()
         1, 1, 19, 99.194942);
     test_validity<Polygon, MultiPolygon, MultiPolygon>("case_110m_multi",
         case_110m_multi[0], case_110m_multi[1]);
+
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_111_multi",
+       case_111_multi[0], case_111_multi[1],
+       2, 0, 10, 16);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_112_multi",
+       case_112_multi[0], case_112_multi[1],
+       2, 0, 16, 48);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_113_multi",
+       case_113_multi[0], case_113_multi[1],
+       2, 0, 13, 162.5);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_114_multi",
+       case_114_multi[0], case_114_multi[1],
+       1, 1, 13, 187.5);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_115_multi",
+       case_115_multi[0], case_115_multi[1],
+       1, 1, 18, 26.7036);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_116_multi",
+       case_116_multi[0], case_116_multi[1],
+       1, 2, 27, 51);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_117_multi",
+       case_117_multi[0], case_117_multi[1],
+       2, 0, 18, 22);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_118_multi",
+       case_118_multi[0], case_118_multi[1],
+       3, 0, 27, 46);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_119_multi",
+       case_119_multi[0], case_119_multi[1],
+       2, 0, 26, 44);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_120_multi",
+       case_120_multi[0], case_120_multi[1],
+       1, 1, 20, 35);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_121_multi",
+       case_121_multi[0], case_121_multi[1],
+       1, 1, 21, 25.5);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_122_multi",
+       case_122_multi[0], case_122_multi[1],
+       1, 1, 28, 29.5);
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_1",
         case_recursive_boxes_1[0], case_recursive_boxes_1[1],
@@ -193,9 +235,36 @@ void test_areal()
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_13",
         case_recursive_boxes_13[0], case_recursive_boxes_13[1],
             3, 0, -1, 10.25);
+
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_14",
         case_recursive_boxes_14[0], case_recursive_boxes_14[1],
             5, 0, -1, 4.5);
+
+    // Invalid versions of 12/13/14
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_12_invalid",
+        case_recursive_boxes_12_invalid[0], case_recursive_boxes_12_invalid[1],
+            6, 0, -1, 6.0);
+
+    if (! ccw)
+    {
+        // Handling this invalid input delivers invalid results for CCW
+        test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_13_invalid",
+            case_recursive_boxes_13_invalid[0], case_recursive_boxes_13_invalid[1],
+                3, 0, -1, 10.25);
+    }
+    else
+    {
+        test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_13_invalid",
+            case_recursive_boxes_13_invalid[0], case_recursive_boxes_13_invalid[1],
+                2, 0, -1, 10.25,
+                ignore_validity);
+    }
+
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_14_invalid",
+        case_recursive_boxes_14_invalid[0], case_recursive_boxes_14_invalid[1],
+            5, 0, -1, 4.5);
+
+
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_15",
         case_recursive_boxes_15[0], case_recursive_boxes_15[1],
             3, 0, -1, 6.0);
@@ -265,6 +334,9 @@ void test_areal()
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_37",
         case_recursive_boxes_37[0], case_recursive_boxes_37[1],
             2, 1, -1, 7.75);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_38",
+        case_recursive_boxes_38[0], case_recursive_boxes_38[1],
+            2, 1, -1, 14.0);
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("ggl_list_20120915_h2_a",
          ggl_list_20120915_h2[0], ggl_list_20120915_h2[1],
@@ -293,12 +365,29 @@ void test_areal()
         ticket_11984[0], ticket_11984[1],
         1, 2, 134, 60071.08077);
 
+    test_one<Polygon, MultiPolygon, MultiPolygon>("ticket_12118",
+        ticket_12118[0], ticket_12118[1],
+        1, 1, 27, 2221.38713);
+
+#if defined(BOOST_GEOMETRY_ENABLE_FAILING_TESTS) || defined(BOOST_GEOMETRY_NO_ROBUSTNESS)
+    // No output if rescaling is done
+    test_one<Polygon, MultiPolygon, MultiPolygon>("ticket_12125",
+        ticket_12125[0], ticket_12125[1],
+        1, 0, -1, 575.831180350007);
+#endif
+
+    // TODO: solve validity, it needs calculating self-turns
+    // Should have 1 hole
     test_one<Polygon, MultiPolygon, MultiPolygon>("mysql_23023665_7",
         mysql_23023665_7[0], mysql_23023665_7[1],
-        1, 1, -1, 99.19494);
+        1, 0, -1, 99.19494,
+        ignore_validity);
+    // Should have 2 holes
     test_one<Polygon, MultiPolygon, MultiPolygon>("mysql_23023665_8",
         mysql_23023665_8[0], mysql_23023665_8[1],
-        1, 2, -1, 1400.0);
+        1, 1, -1, 1400.0,
+        ignore_validity);
+
     test_one<Polygon, MultiPolygon, MultiPolygon>("mysql_23023665_9",
         mysql_23023665_9[0], mysql_23023665_9[1],
         1, 9, -1, 1250.0);

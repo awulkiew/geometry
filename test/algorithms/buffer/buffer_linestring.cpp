@@ -288,7 +288,7 @@ void test_all()
 #endif
 
     test_one<linestring, polygon>("mysql_23023665_1", mysql_23023665, join_round32, end_flat, 459.1051, 10);
-    test_one<linestring, polygon>("mysql_23023665_2", mysql_23023665, join_round32, end_flat, 6877.6941, 50);
+    test_one<linestring, polygon>("mysql_23023665_2", mysql_23023665, join_round32, end_flat, 6877.7096, 50);
 }
 
 template <bool Clockwise, typename P>
