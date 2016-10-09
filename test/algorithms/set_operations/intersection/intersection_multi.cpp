@@ -61,22 +61,16 @@ void test_areal()
         3, 12, 0.666666667);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_58_multi_b",
         case_58_multi[1], case_58_multi[2],
-        1, 1, 19, 11.16666666667);
-    test_one<Polygon, MultiPolygon, MultiPolygon>(
-        "case_58_multi_b4",
+        1, 19, 11.16666666667);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_58_multi_b4",
         case_58_multi[4], case_58_multi[2],
-        1, 1, 13, 12.66666666);
-
-
+        1, 13, 12.66666666);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_58_multi_b5",
         case_58_multi[5], case_58_multi[2],
         1, 13, 13.25);
-    test_one<Polygon, MultiPolygon, MultiPolygon>(
-        "case_58_multi_b6",
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_58_multi_b6",
         case_58_multi[6], case_58_multi[2],
-        1, 1, 13, 13.25);
-
-
+        1, 13, 13.25);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_58_multi_b7",
         case_58_multi[7], case_58_multi[2],
         1, 16, 12.5);
@@ -115,8 +109,7 @@ void test_areal()
         5, 33, 9.0);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_78_multi",
         case_78_multi[0], case_78_multi[1],
-        1, 16, 22.0,
-        ignore_validity);
+        1, 16, 22.0);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_101_multi",
         case_101_multi[0], case_101_multi[1],
         4, 22, 4.75);
@@ -125,8 +118,7 @@ void test_areal()
         3, 26, 19.75);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_102_multi_inv_b",
         case_102_multi[1], case_102_multi[2],
-        3, 25, 3.75,
-        ignore_validity);
+        3, 25, 3.75, ignore_validity);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_107_multi",
         case_107_multi[0], case_107_multi[1],
         2, 10, 1.5);
@@ -141,31 +133,20 @@ void test_areal()
         5, 33, 7.5,
         ignore_validity);
 #endif
-
-
-    test_one<Polygon, MultiPolygon, MultiPolygon>("case_110m_multi",
-        case_110m_multi[0], case_110m_multi[1],
-        2, 11, 9.8050578678287668);
-    test_validity<Polygon, MultiPolygon, MultiPolygon>("case_110m_multi",
-        case_110m_multi[0], case_110m_multi[1]);
-
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_1",
         case_recursive_boxes_1[0], case_recursive_boxes_1[1],
-        8, 97, 47.0,
-        ignore_validity);
-
-    test_one<Polygon, MultiPolygon, MultiPolygon>(
-        "case_recursive_boxes_2",
+        8, 97, 47.0, ignore_validity);
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_2",
         case_recursive_boxes_2[0], case_recursive_boxes_2[1],
-        1, 6, 52, 90.0); // Area from SQL Server
+        1, 50, 90.0); // Area from SQL Server
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_3",
         case_recursive_boxes_3[0], case_recursive_boxes_3[1],
         19, 87, 12.5); // Area from SQL Server
 
-    test_one<Polygon, MultiPolygon, MultiPolygon>(
-        "case_recursive_boxes_4",
+    test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_4",
         case_recursive_boxes_4[0], case_recursive_boxes_4[1],
-        13, 7, 169, 67.0); // Area from SQL Server
+        8, 179, 67.0, // Area from SQL Server
+        ignore_validity);
 
     // Fixed by replacing handle_tangencies in less_by_segment_ratio sort order
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_6",
@@ -299,7 +280,8 @@ void test_areal()
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("mysql_23023665_12",
         mysql_23023665_12[0], mysql_23023665_12[1],
-        2, -1, 11.812440191387557);
+        1, -1, 11.812440191387557,
+        ignore_validity);
 }
 
 template <typename Polygon, typename MultiPolygon, typename Box>

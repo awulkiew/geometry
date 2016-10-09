@@ -42,8 +42,6 @@ class traverse
     template <typename Turns>
     static void reset_visits(Turns& turns)
     {
-        typedef typename boost::range_value<Turns>::type tp_type;
-
         for (typename boost::range_iterator<Turns>::type
             it = boost::begin(turns);
             it != boost::end(turns);
@@ -99,10 +97,7 @@ public :
 
         typename Backtrack::state_type state;
 
-        for (int pass = 0; pass < 2; pass++)
-        {
-            trav.iterate(rings, finalized_ring_size, state, pass);
-        }
+        trav.iterate(rings, finalized_ring_size, state);
     }
 };
 
