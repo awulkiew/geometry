@@ -380,14 +380,14 @@ void test_overlay(std::string const& caseid,
         = bg::get_rescale_policy<rescale_policy_type>(g1, g2);
 
 #if defined(TEST_WITH_SVG)
-    map_visitor<svg_mapper> visitor(mapper);
+    //map_visitor<svg_mapper> visitor(mapper);
 #else
-    bg::detail::overlay::overlay_null_visitor visitor;
+    //bg::detail::overlay::overlay_null_visitor visitor;
 #endif
 
     Geometry result;
     overlay::apply(g1, g2, robust_policy, std::back_inserter(result),
-                   strategy, visitor);
+                   strategy/*, visitor*/);
 
     BOOST_CHECK_CLOSE(bg::area(result), expected_area, 0.001);
     BOOST_CHECK_MESSAGE((bg::num_interior_rings(result) == expected_hole_count),
