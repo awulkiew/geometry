@@ -1370,7 +1370,7 @@ struct buffered_piece_collection
         overlay::split_rings
             <
                 overlay_union
-            >::apply(traversed_rings, m_robust_policy);
+            >::apply(traversed_rings, m_intersection_strategy, m_robust_policy);
     }
 
     inline void reverse()

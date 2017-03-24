@@ -185,7 +185,8 @@ template
 class overlay
 {
 private:
-    template <typename RobustPolicy, typename OutputIterator, typename Strategy, typename Visitor>    static inline OutputIterator do_overlay(
+    template <typename RobustPolicy, typename OutputIterator, typename Strategy, typename Visitor>
+    static inline OutputIterator do_overlay(
                 Geometry1 const& geometry1, Geometry2 const& geometry2,
                 RobustPolicy const& robust_policy,
                 OutputIterator out,
@@ -288,7 +289,7 @@ std::cout << "traverse" << std::endl;
                 selected_ring_properties);
 
         // split the rings into simple rings
-        split_rings<OverlayType>::apply(rings, robust_policy);
+        split_rings<OverlayType>::apply(rings, strategy, robust_policy);
 
         // Add rings created during traversal
         {
@@ -336,11 +337,13 @@ public:
         Geometry1 modified_geometry1;
         bool modified1 = insert_touch_interior_turns(geometry1,
                                                      modified_geometry1,
+                                                     strategy,
                                                      robust_policy);
 
         Geometry2 modified_geometry2;
         bool modified2 = insert_touch_interior_turns(geometry2,
                                                      modified_geometry2,
+                                                     strategy,
                                                      robust_policy);
 
         overlay_null_visitor visitor;
