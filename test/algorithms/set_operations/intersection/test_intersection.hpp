@@ -3,8 +3,8 @@
 
 // Copyright (c) 2007-2015 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2016.
-// Modifications copyright (c) 2016, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2016, 2017.
+// Modifications copyright (c) 2016-2017, Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -183,17 +183,12 @@ typename bg::default_area_result<G1>::type test_intersection(std::string const& 
     if (! settings.debug)
     {
         // Check _inserter behaviour with stratey
-        typedef bg::intersection_strategies
+        typedef typename bg::strategy::intersection::services::default_strategy
             <
-                typename bg::cs_tag<point_type>::type,
-                G1,
-                G2,
-                point_type,
-                typename bg::rescale_policy_type<point_type>::type,
-                CalculationType
-            > strategy;
+                typename bg::cs_tag<point_type>::type
+            >::type strategy_type;
         result_type clip;
-        bg::detail::intersection::intersection_insert<OutputType>(g1, g2, std::back_inserter(clip), strategy());
+        bg::detail::intersection::intersection_insert<OutputType>(g1, g2, std::back_inserter(clip), strategy_type());
     }
 
     typename bg::default_area_result<G1>::type length_or_area = 0;
@@ -201,6 +196,18 @@ typename bg::default_area_result<G1>::type test_intersection(std::string const& 
     // Check normal behaviour
     result_type intersection_output;
     bg::intersection(g1, g2, intersection_output);
+
+    check_result<G1, G2>(intersection_output, caseid, expected_count,
+        expected_holes_count, expected_point_count, expected_length_or_area,
+        settings);
+
+    // Check strategy passed explicitly
+    typedef typename bg::strategy::relate::services::default_strategy
+            <
+                G1, G2
+            >::type strategy_type;
+    intersection_output.clear();
+    bg::intersection(g1, g2, intersection_output, strategy_type());
 
     check_result<G1, G2>(intersection_output, caseid, expected_count,
         expected_holes_count, expected_point_count, expected_length_or_area,
