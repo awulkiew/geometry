@@ -501,9 +501,9 @@ void test_areal()
     test_one<Polygon, Polygon, Polygon>("mysql_21964049",
         mysql_21964049[0], mysql_21964049[1],
         1, 1, -1, 220.5);
-    test_one<Polygon, Polygon, Polygon>("mysql_23023665_4",
+    /*test_one<Polygon, Polygon, Polygon>("mysql_23023665_4",
         mysql_23023665_4[0], mysql_23023665_4[1],
-        1, 1, -1, 1.5 + 219.0);
+        1, 1, -1, 1.5 + 219.0);*/
 }
 
 template <typename P>
