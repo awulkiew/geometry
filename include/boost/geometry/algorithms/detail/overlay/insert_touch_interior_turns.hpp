@@ -57,9 +57,30 @@ template <typename Turn>
 static inline
 typename Turn::turn_operation_type get_correct_op(Turn const& t)
 {
+    typedef typename Turn::turn_operation_type::segment_ratio_type
+        segment_ratio_type;
+    typedef typename segment_ratio_type::numeric_type numeric_type;
+
+    // NOTE: due to numerical issues it's possible that the method will be
+    // method_touch_interior but both fractions will still be 0 or 1 WRT
+    // machine epsilon, so it won't be possible to pick the correct one using
+    // is_zero() or is_one(). Therefore pick the one further from the endpoint.
+    // Still this is probably not the correct solution, rather workaround.
+    // But even as a temporary solution it's ok because the intention is
+    // to stop using this code in the near future.
+
+    segment_ratio_type const& fraction0 = t.operations[0].fraction;
+    segment_ratio_type const& fraction1 = t.operations[1].fraction;
+
+    numeric_type min_num0_dist = (std::min)(fraction0.numerator(),
+                                            fraction0.denominator() - fraction0.numerator());
+    numeric_type min_num1_dist = (std::min)(fraction1.numerator(),
+                                            fraction1.denominator() - fraction1.numerator());
+
     return
-        (t.operations[0].fraction.is_zero()
-         || t.operations[0].fraction.is_one())
+        //(t.operations[0].fraction.is_zero()
+        // || t.operations[0].fraction.is_one())
+        (min_num0_dist * fraction1.denominator() < min_num1_dist * fraction0.denominator())
         ?
         t.operations[1]
         :
@@ -79,11 +100,10 @@ struct maa_turn_less
         typename MAA_Turn::turn_operation_type op1 = get_correct_op(t1);
         typename MAA_Turn::turn_operation_type op2 = get_correct_op(t2);
 
-        BOOST_GEOMETRY_ASSERT(! op1.fraction.is_zero()
-                              && ! op1.fraction.is_one());
-        BOOST_GEOMETRY_ASSERT(! op2.fraction.is_zero()
-                              && ! op2.fraction.is_one());
-
+        //BOOST_GEOMETRY_ASSERT(! op1.fraction.is_zero()
+        //                      && ! op1.fraction.is_one());
+        //BOOST_GEOMETRY_ASSERT(! op2.fraction.is_zero()
+        //                      && ! op2.fraction.is_one());
 
         if (op1.seg_id.multi_index != op2.seg_id.multi_index)
         {
