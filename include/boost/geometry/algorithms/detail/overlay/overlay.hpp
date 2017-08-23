@@ -413,7 +413,7 @@ public:
             return return_if_one_input_is_empty
                 <
                     GeometryOut, OverlayType, ReverseOut
-                >(geometry1, geometry2, out);
+                >(geometry1, geometry2, out, strategy);
         }
 
         Geometry1 modified_geometry1;
