@@ -1,11 +1,11 @@
-// Boost.Geometry (aka GGL, Generic Geometry Library)
+// Boost.Geometry
 
-// Copyright (c) 2015, Oracle and/or its affiliates.
+// Copyright (c) 2015-2017, Oracle and/or its affiliates.
+// Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
+// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
 // http://www.boost.org/users/license.html
-
-// Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_INSERT_TOUCH_INTERIOR_TURNS_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_INSERT_TOUCH_INTERIOR_TURNS_HPP
@@ -32,6 +32,9 @@
 #include <boost/geometry/algorithms/detail/overlay/self_turn_points.hpp>
 #include <boost/geometry/algorithms/detail/overlay/turn_info.hpp>
 
+// only for multiplicable_integral<>
+#include <boost/geometry/strategies/cartesian/side_of_intersection.hpp>
+
 
 namespace boost { namespace geometry
 {
@@ -49,6 +52,36 @@ struct self_turns_no_interrupt_policy
     static inline bool apply(Range const&)
     {
         return false;
+    }
+};
+
+
+template <typename T, bool IsIntegral = boost::is_integral<T>::type::value>
+struct is_fraction_lesser
+{
+    static inline bool apply(T const& n0, T const& d0, T const& n1, T const& d1)
+    {
+        typedef strategy::side::detail::multiplicable_integral<T> mul_t;
+
+        T const l = n0 * d1;
+        T const r = n1 * d0;
+
+        mul_t const ll = mul_t(n0) * mul_t(d1);
+        mul_t const rr = mul_t(n1) * mul_t(d0);
+
+        return ll < rr;
+    }
+};
+
+template <typename T>
+struct is_fraction_lesser<T, false>
+{
+    static inline bool apply(T const& n0, T const& d0, T const& n1, T const& d1)
+    {
+        T const l = n0 * d1;
+        T const r = n1 * d0;
+
+        return l < r;
     }
 };
 
@@ -72,15 +105,16 @@ typename Turn::turn_operation_type get_correct_op(Turn const& t)
     segment_ratio_type const& fraction0 = t.operations[0].fraction;
     segment_ratio_type const& fraction1 = t.operations[1].fraction;
 
-    numeric_type min_num0_dist = (std::min)(fraction0.numerator(),
-                                            fraction0.denominator() - fraction0.numerator());
-    numeric_type min_num1_dist = (std::min)(fraction1.numerator(),
-                                            fraction1.denominator() - fraction1.numerator());
+    numeric_type const min_num0_dist = (std::min)(fraction0.numerator(),
+                                                  fraction0.denominator() - fraction0.numerator());
+    numeric_type const min_num1_dist = (std::min)(fraction1.numerator(),
+                                                  fraction1.denominator() - fraction1.numerator());
 
     return
         //(t.operations[0].fraction.is_zero()
         // || t.operations[0].fraction.is_one())
-        (min_num0_dist * fraction1.denominator() < min_num1_dist * fraction0.denominator())
+        is_fraction_lesser<numeric_type>::apply(min_num0_dist, fraction0.denominator(),
+                                                min_num1_dist, fraction1.denominator())
         ?
         t.operations[1]
         :
@@ -154,9 +188,28 @@ struct insert_maa_turns<Ring, ring_tag>
                                      int ring_index = -1,
                                      int multi_index = -1)
     {
+        // Turns are created for CW geometries so segment_index is consistent
+        // with CW order. So below reverse CCW input before iterating through
+        // the ring and then reverse the output if needed
+
+        static bool const reverse_in =  detail::overlay::do_reverse
+            <
+                geometry::point_order<Ring>::value
+            >::value;
+        static bool const reverse_out =  detail::overlay::do_reverse
+            <
+                geometry::point_order<RingOut>::value
+            >::value;
+
+        typedef typename reversible_view
+            <
+                Ring const,
+                reverse_in ? iterate_reverse : iterate_forward
+            >::type rview_in_type;
+
         typedef typename boost::range_iterator
             <
-                Ring const
+                rview_in_type const
             >::type iterator_type;
 
         typedef typename std::iterator_traits
@@ -164,12 +217,14 @@ struct insert_maa_turns<Ring, ring_tag>
                 TurnIterator
             >::value_type::turn_operation_type operation_type;
 
-        typename boost::range_size<Ring>::type point_index = 0;
-        for (iterator_type it = boost::begin(ring);
-             it != boost::end(ring);
+        rview_in_type const rring(ring);
+
+        typename boost::range_size<rview_in_type>::type point_index = 0;
+        for (iterator_type it = boost::begin(rring);
+             it != boost::end(rring);
              ++it, ++point_index)
         {
-            geometry::append(ring_out, ring[point_index]);
+            geometry::append(ring_out, range::at(rring, point_index));
             while (first != last)
             {
                 operation_type op = get_correct_op(*first);
@@ -189,6 +244,12 @@ struct insert_maa_turns<Ring, ring_tag>
                 }
             }
         }
+
+        if (reverse_out)
+        {
+            geometry::reverse(ring_out);
+        }
+
         return first;
     }
 };
@@ -377,7 +438,7 @@ inline bool insert_touch_interior_turns(GeometryIn const& geometry_in,
     {
         return false;
     }
-
+    
     // insert the touch interior turns
     insert_maa_turns
         <

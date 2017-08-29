@@ -1,11 +1,11 @@
-// Boost.Geometry (aka GGL, Generic Geometry Library)
+// Boost.Geometry
 
-// Copyright (c) 2015, Oracle and/or its affiliates.
+// Copyright (c) 2015-2017, Oracle and/or its affiliates.
+// Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
+// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
 // http://www.boost.org/users/license.html
-
-// Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 
 #ifndef BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_SPLIT_RINGS_HPP
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_OVERLAY_SPLIT_RINGS_HPP
@@ -31,6 +31,7 @@
 
 #include <boost/geometry/algorithms/detail/overlay/get_turn_info.hpp>
 #include <boost/geometry/algorithms/detail/overlay/inconsistent_turns_exception.hpp>
+#include <boost/geometry/algorithms/detail/overlay/insert_touch_interior_turns.hpp>
 #include <boost/geometry/algorithms/detail/overlay/overlay_type.hpp>
 #include <boost/geometry/algorithms/detail/overlay/self_turn_points.hpp>
 #include <boost/geometry/algorithms/detail/overlay/turn_info.hpp>
@@ -196,7 +197,7 @@ class split_ring<overlay_union, Ring, RobustPolicy>
             return false;
         }
     };
-
+    /*
     template <typename Turn>
     static inline
     typename Turn::turn_operation_type get_correct_op(Turn const& t)
@@ -210,7 +211,7 @@ class split_ring<overlay_union, Ring, RobustPolicy>
             t.operations[0]
             ;
     }
-
+    */
     template <typename MAA_Turn>
     struct maa_turn_less
     {
@@ -244,11 +245,10 @@ class split_ring<overlay_union, Ring, RobustPolicy>
             typename MAA_Turn::turn_operation_type op1 = get_correct_op(t1);
             typename MAA_Turn::turn_operation_type op2 = get_correct_op(t2);
 
-            BOOST_GEOMETRY_ASSERT(! op1.fraction.is_zero()
-                                  && ! op1.fraction.is_one());
-            BOOST_GEOMETRY_ASSERT(! op2.fraction.is_zero()
-                                  && ! op2.fraction.is_one());
-
+            //BOOST_GEOMETRY_ASSERT(! op1.fraction.is_zero()
+            //                      && ! op1.fraction.is_one());
+            //BOOST_GEOMETRY_ASSERT(! op2.fraction.is_zero()
+            //                      && ! op2.fraction.is_one());
 
             if (op1.seg_id.segment_index != op2.seg_id.segment_index)
             {
