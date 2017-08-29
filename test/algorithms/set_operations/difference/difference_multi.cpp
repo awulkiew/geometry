@@ -214,19 +214,17 @@ void test_areal()
 
     // Areas correspond with POSTGIS,
     // #clips in PostGIS is 11,11,5 but should most probably be be 12,12,6
-<<<<<<< HEAD
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_1",
         case_recursive_boxes_1[0], case_recursive_boxes_1[1],
             12, 75, 26.0,
             12, 77, 24.0,
              6, 98, 50.0);
-=======
+
 #ifdef BOOST_GEOMETRY_INCLUDE_SELF_TURNS
     TEST_DIFFERENCE(case_recursive_boxes_1, 12, 26.0, 12, 24.0, 6);
 #else
     TEST_DIFFERENCE_IGNORE(case_recursive_boxes_1, 11, 26.0, 12, 24.0, 5);
 #endif
->>>>>>> 012afcb0ef6d9d71741fc62558529c1fa6344461
 
     // Areas correspond with POSTGIS
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_2",
@@ -242,8 +240,6 @@ void test_areal()
             37, -1, 44.0);
 
     // 4, input is not valid
-
-<<<<<<< HEAD
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_5",
         case_recursive_boxes_5[0], case_recursive_boxes_5[1],
             16, -1, 22.0, // #clips should be 16
@@ -255,7 +251,7 @@ void test_areal()
             7, -1, 3.5,
             3, -1, 1.5,
             9, -1, 5.0);
-=======
+
     // Should have 16,12 clips in a,b
 #ifdef BOOST_GEOMETRY_INCLUDE_SELF_TURNS
     TEST_DIFFERENCE(case_recursive_boxes_5, 16, 22.0, 12, 27.0, 10);
@@ -268,7 +264,6 @@ void test_areal()
 #else
     TEST_DIFFERENCE_IGNORE(case_recursive_boxes_6, 6, 3.5, 3, 1.5, 8);
 #endif
->>>>>>> 012afcb0ef6d9d71741fc62558529c1fa6344461
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_7",
         case_recursive_boxes_7[0], case_recursive_boxes_7[1],

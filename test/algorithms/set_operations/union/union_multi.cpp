@@ -130,21 +130,19 @@ void test_areal()
         case_108_multi[0], case_108_multi[1],
         1, 1, 20, 22.75);
 
-<<<<<<< HEAD
     // To make it valid, it is necessary to calculate and use self turns
     // for each input. Now the two holes are connected because a turn is missing
     // there.
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_109_multi",
         case_109_multi[0], case_109_multi[1],
         1, 2, 14, 1400);
-=======
+
     // Should have 2 holes. Needs self turns
 #ifdef BOOST_GEOMETRY_INCLUDE_SELF_TURNS
     TEST_UNION(case_109_multi, 1, 2, 14, 1400);
 #else
     TEST_UNION_IGNORE(case_109_multi, 1, 1, 14, 1400);
 #endif
->>>>>>> 012afcb0ef6d9d71741fc62558529c1fa6344461
 
     // holes, they are all separate and touching
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_110_multi",
@@ -240,13 +238,11 @@ void test_areal()
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_4",
         case_recursive_boxes_4[0], case_recursive_boxes_4[1],
-<<<<<<< HEAD
         1, 2, 43, 96.75);
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_5",
         case_recursive_boxes_5[0], case_recursive_boxes_5[1],
         3, 10, 118, 70.0);
-=======
-        1, 2, 42, 96.75);
+        //1, 2, 42, 96.75);
 
     // Should have 10 holes. Needs self turns
 #ifdef BOOST_GEOMETRY_INCLUDE_SELF_TURNS
@@ -254,7 +250,6 @@ void test_areal()
 #else
     TEST_UNION_IGNORE(case_recursive_boxes_5, 3, 9, 115, 70.0);
 #endif
->>>>>>> 012afcb0ef6d9d71741fc62558529c1fa6344461
 
     // self touching interior ring (should get 3 interior rings)
     test_one<Polygon, MultiPolygon, MultiPolygon>("case_recursive_boxes_6",
