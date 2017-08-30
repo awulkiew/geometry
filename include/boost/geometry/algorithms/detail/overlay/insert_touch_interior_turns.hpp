@@ -27,6 +27,7 @@
 #include <boost/geometry/algorithms/append.hpp>
 #include <boost/geometry/algorithms/clear.hpp>
 #include <boost/geometry/algorithms/convert.hpp>
+#include <boost/geometry/algorithms/reverse.hpp>
 
 #include <boost/geometry/algorithms/detail/overlay/get_turn_info.hpp>
 #include <boost/geometry/algorithms/detail/overlay/self_turn_points.hpp>
