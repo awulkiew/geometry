@@ -610,6 +610,15 @@ struct traversal
             }
         }
 
+        for (int i = 0 ; i < sbs.m_ranked_points.size() ; ++i)
+        {
+            std::cout << geometry::wkt(sbs.m_ranked_points[i].point) << " "
+                      << sbs.m_ranked_points[i].seg_id.source_index << " "
+                      << sbs.m_ranked_points[i].seg_id.multi_index << " "
+                      << sbs.m_ranked_points[i].seg_id.ring_index << " "
+                      << sbs.m_ranked_points[i].seg_id.segment_index << std::endl;
+        }
+
         if (! sbs.has_origin())
         {
             return false;

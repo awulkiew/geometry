@@ -124,6 +124,11 @@ struct traversal_ring_creator
             }
         }
 
+        if (current_ring.size() == 36)
+        {
+            int a = 10;
+        }
+
         if (m_turns[turn_index].discarded)
         {
             return is_start

@@ -7,6 +7,7 @@
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <boost/geometry/io/wkt/wkt.hpp>
 #include <test_buffer.hpp>
 
 static std::string const simplex = "MULTIPOINT((5 5),(7 7))";
@@ -41,7 +42,7 @@ void test_all()
     bg::strategy::buffer::side_straight side_strategy;
 
     double const pi = boost::geometry::math::pi<double>();
-
+/*
     test_one<multi_point_type, polygon>("simplex1", simplex, join, end_flat, 2.0 * pi, 1.0, 1.0);
     test_one<multi_point_type, polygon>("simplex2", simplex, join, end_flat, 22.8372, 2.0, 2.0);
     test_one<multi_point_type, polygon>("simplex3", simplex, join, end_flat, 44.5692, 3.0, 3.0);
@@ -80,7 +81,7 @@ void test_all()
             mysql_report_2015_02_25_1, join, end_flat,
             distance_strategy(6051788), side_strategy,
             bg::strategy::buffer::point_circle(800), 115057490003226.125, 1.0);
-
+*/
     {
         multi_point_type g;
         bg::read_wkt(mysql_report_3, g);
