@@ -993,6 +993,13 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
     collection.block_turns();
     collection.enrich();
 
+    for (int i = 0 ; i < collection.m_clusters.size() ; ++i)
+    {
+        std::copy(collection.m_clusters[i].turn_indices.begin(), collection.m_clusters[i].turn_indices.end(),
+                  std::ostream_iterator<signed_size_type>(std::cout, " "));
+        std::cout << std::endl;
+    }
+
     // phase 1: turns (after enrichment/clustering)
     visit_pieces_policy.apply(const_collection, 1);
 
