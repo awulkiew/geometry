@@ -86,6 +86,9 @@ public:
 
         if (BOOST_GEOMETRY_CONDITION(Closure == closed))
         {
+            // Make sure that the endpoints of original are exactly the same
+            *pos2 = *pos1;
+            // Close the other ring
             other.m_list.push_back(*other.m_list.begin());
         }
     }
@@ -363,6 +366,7 @@ class split_ring<overlay_union, Ring, RobustPolicy>
             {
                 RingType other_ring;
                 top_ring.split_at(pos1, pos2, other_ring);
+
                 move_to_top(stack, other_ring);
             }
             else
