@@ -238,7 +238,8 @@ inline OutputIterator return_if_one_input_is_empty(Geometry1 const& geometry1,
     select_rings<OverlayType>(geometry1, geometry2, empty, all_of_one_of_them, strategy);
     ring_container_type rings;
     assign_parents(geometry1, geometry2, rings, all_of_one_of_them, strategy);
-    return add_rings<GeometryOut>(all_of_one_of_them, geometry1, geometry2, rings, out);
+    return add_rings<GeometryOut>(all_of_one_of_them, geometry1, geometry2, rings, out,
+                                  strategy.template get_area_strategy<point_type1>());
 }
 
 
@@ -378,9 +379,8 @@ std::cout << "traverse" << std::endl;
         split_rings<OverlayType>::apply(rings, strategy, robust_policy);
 
         // Add rings created during traversal
+        area_strategy_type const area_strategy = strategy.template get_area_strategy<point_type>();
         {
-            area_strategy_type const area_strategy = strategy.template get_area_strategy<point_type>();
-
             ring_identifier id(2, 0, -1);
             for (typename boost::range_iterator<ring_container_type>::type
                     it = boost::begin(rings);
@@ -398,10 +398,18 @@ std::cout << "traverse" << std::endl;
         // NOTE: There is no need to check result area for union because
         // as long as the polygons in the input are valid the resulting
         // polygons should be valid as well.
-        // This also solves the issue with non-cartesian CSes, the result may
-        // be too big so the area is negative but it's returned anyway.
+        // This also solves the issue with non-cartesian CSes. The result may
+        // be too big, so the area is negative. In this case either it's returned
+        // anyway (default) or an exception is thrown (based on #define).
         return add_rings<GeometryOut>(selected_ring_properties, geometry1, geometry2, rings, out,
-                                      OverlayType != overlay_union);
+                                      area_strategy,
+                                      OverlayType == overlay_union ? 
+#ifdef BOOST_GEOMETRY_UNION_THROW_INVALID_OUTPUT_EXCEPTION
+                                      add_rings_throw_if_reversed
+#else
+                                      add_rings_add_unordered
+#endif
+                                      : add_rings_ignore_unordered);
     }
 
 public:
