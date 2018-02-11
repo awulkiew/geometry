@@ -3,8 +3,8 @@
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2013-2014 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2014, 2016, 2017.
-// Modifications copyright (c) 2014-2017, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2014, 2016, 2017, 2018.
+// Modifications copyright (c) 2014-2018, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -181,21 +181,17 @@ struct cartesian_segments
 
             typedef typename promote_integral<CoordinateType>::type promoted_type;
 
-            promoted_type const numerator
-                = boost::numeric_cast<promoted_type>(ratio.numerator());
-            promoted_type const denominator
-                = boost::numeric_cast<promoted_type>(ratio.denominator());
             promoted_type const dx_promoted = boost::numeric_cast<promoted_type>(dx);
             promoted_type const dy_promoted = boost::numeric_cast<promoted_type>(dy);
 
             set<0>(point, get<0, 0>(segment) + boost::numeric_cast
                 <
                     CoordinateType
-                >(numerator * dx_promoted / denominator));
+                >(ratio.mul_fp(dx_promoted)));
             set<1>(point, get<0, 1>(segment) + boost::numeric_cast
                 <
                     CoordinateType
-                >(numerator * dy_promoted / denominator));
+                >(ratio.mul_fp(dy_promoted)));
         }
 
         CoordinateType dx_a, dy_a;
@@ -319,6 +315,8 @@ struct cartesian_segments
                 RobustPolicy
             >::type ratio_type;
 
+        typedef typename ratio_type::numeric_type ratio_numeric_type;
+
         segment_intersection_info
             <
                 typename select_calculation_type<Segment1, Segment2, CalculationType>::type,
@@ -339,8 +337,8 @@ struct cartesian_segments
         // (only calculated for non-collinear segments)
         if (! collinear)
         {
-            robust_coordinate_type robust_da0, robust_da;
-            robust_coordinate_type robust_db0, robust_db;
+            ratio_numeric_type robust_da0, robust_da;
+            ratio_numeric_type robust_db0, robust_db;
 
             cramers_rule(robust_dx_a, robust_dy_a, robust_dx_b, robust_dy_b,
                 get<0>(robust_a1) - get<0>(robust_b1),
@@ -354,7 +352,7 @@ struct cartesian_segments
 
             math::detail::equals_factor_policy<robust_coordinate_type>
                 policy(robust_dx_a, robust_dy_a, robust_dx_b, robust_dy_b);
-            robust_coordinate_type const zero = 0;
+            ratio_numeric_type const zero = 0;
             if (math::detail::equals_by_policy(robust_da0, zero, policy)
              || math::detail::equals_by_policy(robust_db0, zero, policy))
             {

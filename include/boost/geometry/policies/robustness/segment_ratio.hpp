@@ -2,8 +2,8 @@
 
 // Copyright (c) 2013 Barend Gehrels, Amsterdam, the Netherlands.
 
-// This file was modified by Oracle on 2016.
-// Modifications copyright (c) 2016 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2016-2018.
+// Modifications copyright (c) 2016, 2018 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -20,6 +20,10 @@
 #include <boost/geometry/util/math.hpp>
 #include <boost/geometry/util/promote_floating_point.hpp>
 
+#if !defined(BOOST_HAS_INT128) || defined(BOOST_GEOMETRY_DISABLE_INT128_TYPE)
+#include <boost/multiprecision/cpp_int.hpp>
+#endif
+
 namespace boost { namespace geometry
 {
 
@@ -30,7 +34,8 @@ namespace detail { namespace segment_ratio
 template
 <
     typename Type,
-    bool IsIntegral = boost::is_integral<Type>::type::value
+    bool UseRational = boost::is_integral<Type>::type::value
+                    && std::numeric_limits<Type>::is_specialized
 >
 struct less {};
 
@@ -61,7 +66,8 @@ struct less<Type, false>
 template
 <
     typename Type,
-    bool IsIntegral = boost::is_integral<Type>::type::value
+    bool UseRational = boost::is_integral<Type>::type::value
+                    && std::numeric_limits<Type>::is_specialized
 >
 struct equal {};
 
@@ -91,6 +97,32 @@ struct equal<Type, false>
             );
     }
 };
+
+
+template <typename T, typename F>
+struct mul_fp_impl
+{
+    static F apply(T const& numerator, T const& denominator, F const& value)
+    {
+        return boost::numeric_cast<F>(numerator) * value
+                / boost::numeric_cast<F>(denominator);
+    }
+};
+
+#if !defined(BOOST_HAS_INT128) || defined(BOOST_GEOMETRY_DISABLE_INT128_TYPE)
+template <typename Backend, typename F>
+struct mul_fp_impl<boost::multiprecision::number<Backend>, F>
+{
+    typedef boost::multiprecision::number<Backend> numeric_type;
+
+    static F apply(numeric_type const& numerator, numeric_type const& denominator, F const& value)
+    {
+        return numerator.template convert_to<F>() * value
+                / denominator.template convert_to<F>();
+    }
+};
+#endif
+
 
 }}
 
@@ -145,10 +177,7 @@ public :
 
         m_approximation =
             m_denominator == 0 ? 0
-            : (
-                boost::numeric_cast<fp_type>(m_numerator) * scale()
-                / boost::numeric_cast<fp_type>(m_denominator)
-            );
+            : mul_fp(scale());
     }
 
     inline bool is_zero() const { return math::equals(m_numerator, 0); }
@@ -232,6 +261,14 @@ public :
     }
 #endif
 
+    template <typename F>
+    inline F mul_fp(F const& f) const
+    {
+        return detail::segment_ratio::mul_fp_impl
+            <
+                Type, F
+            >::apply(m_numerator, m_denominator, f);
+    }
 
 
 private :

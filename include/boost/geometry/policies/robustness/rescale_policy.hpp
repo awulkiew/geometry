@@ -5,7 +5,7 @@
 // Copyright (c) 2014-2015 Mateusz Loskot, London, UK.
 // Copyright (c) 2014-2015 Adam Wulkiewicz, Lodz, Poland.
 
-// Copyright (c) 2015, Oracle and/or its affiliates.
+// Copyright (c) 2015-2018, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -18,11 +18,17 @@
 
 #include <cstddef>
 
+#include <boost/config.hpp>
+
 #include <boost/geometry/policies/robustness/segment_ratio.hpp>
 #include <boost/geometry/policies/robustness/segment_ratio_type.hpp>
 #include <boost/geometry/policies/robustness/robust_point_type.hpp>
 
 #include <boost/geometry/util/math.hpp>
+
+#if !defined(BOOST_HAS_INT128) || defined(BOOST_GEOMETRY_DISABLE_INT128_TYPE)
+#include <boost/multiprecision/cpp_int.hpp>
+#endif
 
 namespace boost { namespace geometry
 {
@@ -64,7 +70,6 @@ struct robust_policy
 } // namespace detail
 #endif
 
-
 // Implement meta-functions for this policy
 
 // Define the IntPoint as a robust-point type
@@ -78,7 +83,22 @@ struct robust_point_type<Point, detail::robust_policy<FpPoint, IntPoint, Calcula
 template <typename Point, typename FpPoint, typename IntPoint, typename CalculationType>
 struct segment_ratio_type<Point, detail::robust_policy<FpPoint, IntPoint, CalculationType> >
 {
-    typedef segment_ratio<boost::long_long_type> type;
+#if !defined(BOOST_HAS_INT128) || defined(BOOST_GEOMETRY_DISABLE_INT128_TYPE)
+    typedef boost::multiprecision::int128_t numeric_type;
+#else
+    // NOTE: boost::rational requires numeric_limits to be specialized
+    // and it's used in segment_ratio if is_integral<numeric_type>
+    /*typedef boost::mpl::if_c
+        <
+            std::numeric_limits<boost::int128_type>::is_specialized,
+            boost::int128_type,
+            boost::multiprecision::int128_t
+        >::type numeric_type;*/
+    typedef boost::int128_type numeric_type;    
+#endif
+
+    //typedef segment_ratio<boost::long_long_type> type;
+    typedef segment_ratio<numeric_type> type;
 };
 
 
