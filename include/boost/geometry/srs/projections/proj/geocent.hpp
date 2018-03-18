@@ -107,9 +107,15 @@ namespace projections
             template <typename Parameters>
             inline void setup_geocent(Parameters& par)
             {
+                par.need_ellps = 0; // CONVERSION (geocent, 0)
+
                 par.is_geocent = 1;
                 par.x0 = 0.0;
                 par.y0 = 0.0;
+                par.left = PJ_IO_UNITS_ANGULAR;
+                //par.right = PJ_IO_UNITS_CARTESIAN;
+                // TODO: in the original proj4 different units are used
+                par.right = PJ_IO_UNITS_CLASSIC;
             }
 
     }} // namespace detail::geocent

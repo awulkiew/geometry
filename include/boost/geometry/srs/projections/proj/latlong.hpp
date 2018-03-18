@@ -90,20 +90,16 @@ namespace projections
                 // Project coordinates from geographic (lon, lat) to cartesian (x, y)
                 inline void fwd(geographic_type& lp_lon, geographic_type& lp_lat, cartesian_type& xy_x, cartesian_type& xy_y) const
                 {
-                    // TODO: in the original code a is not used
-                    // different mechanism is probably used instead
-                    xy_x = lp_lon / this->m_par.a;
-                    xy_y = lp_lat / this->m_par.a;
+                    xy_x = lp_lon;
+                    xy_y = lp_lat;
                 }
 
                 // INVERSE(inverse)
                 // Project coordinates from cartesian (x, y) to geographic (lon, lat)
                 inline void inv(cartesian_type& xy_x, cartesian_type& xy_y, geographic_type& lp_lon, geographic_type& lp_lat) const
                 {
-                    // TODO: in the original code a is not used
-                    // different mechanism is probably used instead
-                    lp_lat = xy_y * this->m_par.a;
-                    lp_lon = xy_x * this->m_par.a;
+                    lp_lat = xy_y;
+                    lp_lon = xy_x;
                 }
 
                 static inline std::string get_name()
@@ -113,40 +109,14 @@ namespace projections
 
             };
 
-            // Lat/long (Geodetic)
             template <typename Parameters>
-            inline void setup_lonlat(Parameters& par)
+            inline void setup(Parameters& par)
             {
-                    par.is_latlong = 1;
-                    par.x0 = 0.0;
-                    par.y0 = 0.0;
-            }
-
-            // Lat/long (Geodetic alias)
-            template <typename Parameters>
-            inline void setup_latlon(Parameters& par)
-            {
-                    par.is_latlong = 1;
-                    par.x0 = 0.0;
-                    par.y0 = 0.0;
-            }
-
-            // Lat/long (Geodetic alias)
-            template <typename Parameters>
-            inline void setup_latlong(Parameters& par)
-            {
-                    par.is_latlong = 1;
-                    par.x0 = 0.0;
-                    par.y0 = 0.0;
-            }
-
-            // Lat/long (Geodetic alias)
-            template <typename Parameters>
-            inline void setup_longlat(Parameters& par)
-            {
-                    par.is_latlong = 1;
-                    par.x0 = 0.0;
-                    par.y0 = 0.0;
+                par.is_latlong = 1;
+                par.x0 = 0.0;
+                par.y0 = 0.0;
+                par.left = PJ_IO_UNITS_ANGULAR;
+                par.right = PJ_IO_UNITS_ANGULAR;
             }
 
     }} // namespace detail::latlong
@@ -166,7 +136,7 @@ namespace projections
     {
         inline lonlat_other(const Parameters& par) : detail::latlong::base_latlong_other<CalculationType, Parameters>(par)
         {
-            detail::latlong::setup_lonlat(this->m_par);
+            detail::latlong::setup(this->m_par);
         }
     };
 
@@ -184,7 +154,7 @@ namespace projections
     {
         inline latlon_other(const Parameters& par) : detail::latlong::base_latlong_other<CalculationType, Parameters>(par)
         {
-            detail::latlong::setup_latlon(this->m_par);
+            detail::latlong::setup(this->m_par);
         }
     };
 
@@ -202,7 +172,7 @@ namespace projections
     {
         inline latlong_other(const Parameters& par) : detail::latlong::base_latlong_other<CalculationType, Parameters>(par)
         {
-            detail::latlong::setup_latlong(this->m_par);
+            detail::latlong::setup(this->m_par);
         }
     };
 
@@ -220,7 +190,7 @@ namespace projections
     {
         inline longlat_other(const Parameters& par) : detail::latlong::base_latlong_other<CalculationType, Parameters>(par)
         {
-            detail::latlong::setup_longlat(this->m_par);
+            detail::latlong::setup(this->m_par);
         }
     };
 

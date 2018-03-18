@@ -121,6 +121,11 @@ namespace projections
                     link->inv(xy_x, xy_y, lp_lon, lp_lat);
                 }
 
+                Parameters const& params() const
+                {
+                    return link->params();
+                }
+
                 boost::shared_ptr<base_v<CalculationType, Parameters> > link;
                 CalculationType lamp;
                 CalculationType cphip, sphip;
@@ -162,6 +167,11 @@ namespace projections
                 inline void inv(T& xy_x, T& xy_y, T& lp_lon, T& lp_lat) const
                 {
                     link.inv(xy_x, xy_y, lp_lon, lp_lat);
+                }
+
+                Parameters const& params() const
+                {
+                    return link.params();
                 }
 
                 projection_type link;
@@ -278,11 +288,10 @@ namespace projections
                 } else { /* transverse */
                 }
 
-                // TODO:
                 /* Support some rather speculative test cases, where the rotated projection */
                 /* is actually latlong. We do not want scaling in that case... */
-                //if (proj_parm.link...mutable_parameters().right==PJ_IO_UNITS_ANGULAR)
-                //    par.right = PJ_IO_UNITS_PROJECTED;
+                if (proj_parm.params().right == PJ_IO_UNITS_ANGULAR)
+                    par.right = PJ_IO_UNITS_PROJECTED;
 
                 // return phip to choose model
                 return phip;

@@ -33,6 +33,19 @@ inline bool is_invalid_point(Point const& point)
     return geometry::get<0>(point) == HUGE_VAL;
 }
 
+template <typename T>
+inline void set_invalid_point(T & x, T & y)
+{
+    x = HUGE_VAL;
+    y = HUGE_VAL;
+}
+
+template <typename T>
+inline bool is_invalid_point(T const& x, T const& /*y*/)
+{
+    return x == HUGE_VAL;
+}
+
 }}} // namespace boost::geometry::projections
 
 #endif // BOOST_GEOMETRY_PROJECTIONS_INVALID_POINT_HPP
