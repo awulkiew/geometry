@@ -4,8 +4,8 @@
 // Copyright (c) 2008-2015 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2015 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2015, 2017.
-// Modifications copyright (c) 2015-2017, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2015, 2017, 2018.
+// Modifications copyright (c) 2015-2018, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -34,6 +34,8 @@
 #include <boost/geometry/strategies/side.hpp>
 
 #include <boost/geometry/algorithms/detail/equals/point_point.hpp>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 
 namespace boost { namespace geometry
@@ -111,10 +113,10 @@ public :
         CoordinateType const sx2 = get<0>(p2);
         CoordinateType const sy2 = get<1>(p2);
 
-        PromotedType const dx = sx2 - sx1;
-        PromotedType const dy = sy2 - sy1;
-        PromotedType const dpx = x - sx1;
-        PromotedType const dpy = y - sy1;
+        PromotedType const dx = PromotedType(sx2) - PromotedType(sx1);
+        PromotedType const dy = PromotedType(sy2) - PromotedType(sy1);
+        PromotedType const dpx = PromotedType(x) - PromotedType(sx1);
+        PromotedType const dpy = PromotedType(y) - PromotedType(sy1);
 
         eps_policy = EpsPolicy(dx, dy, dpx, dpy);
 
@@ -241,18 +243,34 @@ public :
                 double
             >::type promoted_type;
 
-        bool const are_all_integral_coordinates =
+        static bool const are_all_integral_coordinates =
             boost::is_integral<coordinate_type1>::value
             && boost::is_integral<coordinate_type2>::value
             && boost::is_integral<coordinate_type3>::value;
 
-        eps_policy< math::detail::equals_factor_policy<promoted_type> > epsp;
-        promoted_type s = compute_side_value
+        typedef typename boost::mpl::if_c
             <
-                coordinate_type, promoted_type, are_all_integral_coordinates
+                are_all_integral_coordinates,
+                boost::multiprecision::number
+                    <
+                        boost::multiprecision::cpp_int_backend
+                            <
+                                64, 256,
+                                boost::multiprecision::signed_magnitude,
+                                boost::multiprecision::unchecked,
+                                void
+                            >
+                    >,
+                promoted_type
+            >::type numeric_type;
+
+        eps_policy< math::detail::equals_factor_policy<numeric_type> > epsp;
+        numeric_type s = compute_side_value
+            <
+                coordinate_type, numeric_type, are_all_integral_coordinates
             >::apply(p1, p2, p, epsp);
 
-        promoted_type const zero = promoted_type();
+        numeric_type const zero = 0;
         return math::detail::equals_by_policy(s, zero, epsp.policy) ? 0
             : s > zero ? 1
             : -1;

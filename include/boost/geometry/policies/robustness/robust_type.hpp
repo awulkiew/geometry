@@ -16,6 +16,8 @@
 #include <boost/config.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 
 namespace boost { namespace geometry
 {

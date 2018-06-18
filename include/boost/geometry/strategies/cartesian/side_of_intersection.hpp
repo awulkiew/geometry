@@ -35,6 +35,8 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #endif
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 namespace boost { namespace geometry
 {
 
@@ -154,12 +156,15 @@ private :
         // Both a*b and c*d are positive
         // We have to judge if a*b > c*d
 
-        using side::detail::multiplicable_integral;
+        /*using side::detail::multiplicable_integral;
         multiplicable_integral<T> ab = multiplicable_integral<T>(a)
                                      * multiplicable_integral<T>(b);
         multiplicable_integral<T> cd = multiplicable_integral<T>(c)
-                                     * multiplicable_integral<T>(d);
-        
+                                     * multiplicable_integral<T>(d);*/
+
+        T ab = a * b;
+        T cd = c * d;
+
         int result = ab > cd ? 1
                    : ab < cd ? -1
                    : 0
@@ -232,14 +237,14 @@ public :
         T const cx = get<0, 0>(c);
         T const cy = get<0, 1>(c);
 
-        T const dx_a = get<1, 0>(a) - ax;
-        T const dy_a = get<1, 1>(a) - ay;
+        T const dx_a = T(get<1, 0>(a)) - ax;
+        T const dy_a = T(get<1, 1>(a)) - ay;
 
-        T const dx_b = get<1, 0>(b) - bx;
-        T const dy_b = get<1, 1>(b) - by;
+        T const dx_b = T(get<1, 0>(b)) - bx;
+        T const dy_b = T(get<1, 1>(b)) - by;
 
-        T const dx_c = get<1, 0>(c) - cx;
-        T const dy_c = get<1, 1>(c) - cy;
+        T const dx_c = T(get<1, 0>(c)) - cx;
+        T const dy_c = T(get<1, 1>(c)) - cy;
 
         // Cramer's rule: d (see cart_intersect.hpp)
         T const d = geometry::detail::determinant<T>
@@ -248,7 +253,7 @@ public :
                         dx_b, dy_b
                     );
 
-        T const zero = T();
+        T const zero = 0;
         if (d == zero)
         {
             // There is no IP of a//b, they are collinear or parallel
@@ -331,8 +336,25 @@ public :
             Point const& fallback_point)
     {
         typedef typename geometry::coordinate_type<Segment>::type coordinate_type;
-        coordinate_type const s = side_value<coordinate_type>(a, b, c, fallback_point);
-        coordinate_type const zero = coordinate_type();
+
+        typedef typename boost::mpl::if_c
+            <
+                boost::is_integral<coordinate_type>::value,
+                boost::multiprecision::number
+                    <
+                        boost::multiprecision::cpp_int_backend
+                            <
+                                64, 256,
+                                boost::multiprecision::signed_magnitude,
+                                boost::multiprecision::unchecked,
+                                void
+                            >
+                    >,
+                coordinate_type
+            >::type numeric_type;
+
+        numeric_type const s = side_value<numeric_type>(a, b, c, fallback_point);
+        numeric_type const zero = 0;
         return math::equals(s, zero) ? 0
             : s > zero ? 1
             : -1;
