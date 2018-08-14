@@ -580,7 +580,7 @@ void test_specific()
 
 int test_main(int, char* [])
 {
-    test_all<bg::model::d2::point_xy<double> >();
+    test_all<bg::model::d2::point_xy<double > >();
 
     test_specific<bg::model::d2::point_xy<int>, false, false>();
 
