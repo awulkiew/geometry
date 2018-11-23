@@ -108,16 +108,36 @@ public:
             >::type calc_t;
 
         typedef typename FormulaPolicy::template inverse
-                    <calc_t, false, true, false, false, false> inverse_formula;
+                    <calc_t, false, true, false, false, false> azimuth;
+        typedef typename FormulaPolicy::template inverse
+                    <calc_t, false, true, true, false, false> azimuth2;
 
-        calc_t a1p = azimuth<calc_t, inverse_formula>(p1, p, m_model);
-        calc_t a12 = azimuth<calc_t, inverse_formula>(p1, p2, m_model);
+        calc_t lon1 = get_as_radian<0>(p1);
+        calc_t lat1 = get_as_radian<1>(p1);
+        calc_t lon2 = get_as_radian<0>(p2);
+        calc_t lat2 = get_as_radian<1>(p2);
+        calc_t lon = get_as_radian<0>(p);
+        calc_t lat = get_as_radian<1>(p);
 
-        return formula::azimuth_side_value(a1p, a12);
+        calc_t a1p = azimuth::apply(lon1, lat1, lon, lat, m_model).azimuth;
+        formula::result_inverse<calc_t>
+            a12 = azimuth2::apply(lon1, lat1, lon2, lat2, m_model);
+
+        int result = formula::azimuth_side_value(a1p, a12.azimuth);
+
+        // Make sure if the point really lies on the segment
+        // consider e.g.: (0 0, -90 0, 90 0)
+        if (result == 0)
+        {
+            calc_t a2p = azimuth::apply(lon2, lat2, lon, lat, m_model).azimuth;
+            result = formula::azimuth_side_value(a2p, a12.reverse_azimuth);
+        }
+
+        return result;
     }
 
 private:
-    template <typename ResultType,
+    /*template <typename ResultType,
               typename InverseFormulaType,
               typename Point1,
               typename Point2,
@@ -130,7 +150,7 @@ private:
                                          get_as_radian<0>(point2),
                                          get_as_radian<1>(point2),
                                          model).azimuth;
-    }
+    }*/
 
     Spheroid m_model;
 };
