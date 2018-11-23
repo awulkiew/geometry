@@ -95,25 +95,25 @@ public:
         : m_model(model)
     {}
 
-    template <typename P1, typename P2, typename P>
-    inline int apply(P1 const& p1, P2 const& p2, P const& p) const
+    template <typename P1, typename P2, typename P3>
+    inline int apply(P1 const& p1, P2 const& p2, P3 const& p3) const
     {
         typedef typename promote_floating_point
             <
                 typename select_calculation_type_alt
                     <
                         CalculationType,
-                        P1, P2, P
+                        P1, P2, P3
                     >::type
             >::type calc_t;
 
         typedef typename FormulaPolicy::template inverse
                     <calc_t, false, true, false, false, false> inverse_formula;
 
-        calc_t a1p = azimuth<calc_t, inverse_formula>(p1, p, m_model);
-        calc_t a12 = azimuth<calc_t, inverse_formula>(p1, p2, m_model);
+        calc_t a23 = azimuth<calc_t, inverse_formula>(p2, p3, m_model);
+        calc_t a21 = azimuth<calc_t, inverse_formula>(p2, p1, m_model);
 
-        return formula::azimuth_side_value(a1p, a12);
+        return -formula::azimuth_side_value(a23, a21);
     }
 
 private:
