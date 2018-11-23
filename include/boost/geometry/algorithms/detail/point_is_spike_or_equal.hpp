@@ -75,7 +75,10 @@ inline bool point_is_spike_or_equal(Point1 const& last_point, // prev | back
                                     Point3 const& segment_b,  // curr | back - 1 | spike's vertex
                                     SideStrategy const& strategy)
 {
-    int const side = strategy.apply(segment_a, segment_b, last_point);
+    // NOTE: currently some strategies (like geographic side) tests sideness using the first point
+    // of a segment as reference point so in order to test for spike properly one has to pass
+    // the potential spike point as the first point of a segment
+    int const side = strategy.apply(segment_b, segment_a, last_point);
     if (side == 0)
     {
         // Last point is collinear w.r.t previous segment.
