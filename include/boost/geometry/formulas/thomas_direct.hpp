@@ -1,6 +1,6 @@
 // Boost.Geometry
 
-// Copyright (c) 2016-2018 Oracle and/or its affiliates.
+// Copyright (c) 2016-2019 Oracle and/or its affiliates.
 
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -80,11 +80,14 @@ public:
         CT const pi = math::pi<CT>();
         CT const pi_half = pi / c2;
 
+        CT azi12 = azimuth12;
+        math::normalize_azimuth<radian>(azi12);
+
         // keep azimuth small - experiments show low accuracy
         // if the azimuth is closer to (+-)180 deg.
-        CT azi12_alt = azimuth12;
+        CT azi12_alt = azi12;
         CT lat1_alt = lat1;
-        bool alter_result = vflip_if_south(lat1, azimuth12, lat1_alt, azi12_alt);
+        bool alter_result = vflip_if_south(lat1, azi12, lat1_alt, azi12_alt);
 
         CT const theta1 = math::equals(lat1_alt, pi_half) ? lat1_alt :
                           math::equals(lat1_alt, -pi_half) ? lat1_alt :
@@ -115,7 +118,7 @@ public:
             P = C2 / D;
         }
         // special case for equator:
-        // sin_theta0 = 0 <=> lat1 = 0 ^ |azimuth12| = pi/2
+        // sin_theta0 = 0 <=> lat1 = 0 ^ |azi12| = pi/2
         // NOTE: in this case it doesn't matter what's the value of cos_sigma1 because
         //       theta1=0, theta0=0, M=1|-1, C2=0 so X=0 and Y=0 so d_sigma=d
         //       cos_a12=0 so N=0, therefore
@@ -152,7 +155,7 @@ public:
 
             if (alter_result)
             {
-                vflip_rev_azi(result.reverse_azimuth, azimuth12);
+                vflip_rev_azi(result.reverse_azimuth, azi12);
             }
         }
 
@@ -196,7 +199,7 @@ public:
         {
             typedef differential_quantities<CT, EnableReducedLength, EnableGeodesicScale, 2> quantities;
             quantities::apply(lon1, lat1, result.lon2, result.lat2,
-                              azimuth12, result.reverse_azimuth,
+                              azi12, result.reverse_azimuth,
                               b, f,
                               result.reduced_length, result.geodesic_scale);
         }
@@ -227,14 +230,14 @@ private:
         return false;
     }
 
-    static inline void vflip_rev_azi(CT & rev_azi, CT const& azimuth12)
+    static inline void vflip_rev_azi(CT & rev_azi, CT const& azi12)
     {
         CT const c0 = 0;
         CT const pi = math::pi<CT>();
 
         if (rev_azi == c0)
         {
-            rev_azi = azimuth12 >= 0 ? pi : -pi;
+            rev_azi = azi12 >= 0 ? pi : -pi;
         }
         else if (rev_azi > c0)
         {

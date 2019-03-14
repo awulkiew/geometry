@@ -14,6 +14,7 @@
 
 #include <boost/geometry/util/condition.hpp>
 #include <boost/geometry/util/math.hpp>
+#include <boost/geometry/util/normalize_spheroidal_coordinates.hpp>
 
 
 namespace boost { namespace geometry { namespace formula
@@ -73,7 +74,10 @@ public:
             CT const sig_12 = dlon / one_minus_f;
             if (BOOST_GEOMETRY_CONDITION(EnableReducedLength))
             {
-                int azi_sign = math::sign(azimuth) >= 0 ? 1 : -1; // for antipodal
+                CT azi = azimuth;
+                math::normalize_azimuth<radian>(azi); // {pi/2, -pi/2}
+
+                int azi_sign = math::sign(azi) >= 0 ? 1 : -1; // for antipodal
                 CT m12 = azi_sign * sin(sig_12) * b;
                 reduced_length = m12;
             }
