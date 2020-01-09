@@ -5,6 +5,9 @@
 // Copyright (c) 2014 Mateusz Loskot, London, UK.
 // Copyright (c) 2014 Adam Wulkiewicz, Lodz, Poland.
 
+// This file was modified by Oracle on 2020.
+// Modifications copyright (c) 2020 Oracle and/or its affiliates.
+
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -42,6 +45,16 @@ template <typename CoordinateType>
 struct robust_type<CoordinateType, boost::true_type>
 {
     typedef boost::long_long_type type;
+    /*typedef boost::multiprecision::number
+        <
+            boost::multiprecision::cpp_int_backend
+                <
+                    64, 256,
+                    boost::multiprecision::signed_magnitude,
+                    boost::multiprecision::unchecked,
+                    void
+                >
+        > type;*/
 };
 
 } // namespace detail_dispatch
