@@ -59,14 +59,14 @@ struct get_turns
 
     template <typename Strategy>
     struct robust_policy_type
-        : geometry::rescale_overlay_policy_type
+        /*: geometry::rescale_overlay_policy_type
             <
                 Geometry1,
                 Geometry2,
                 typename Strategy::cs_tag
-            >
+            >*/
     {
-        //typedef detail::no_rescale_policy type;
+        typedef detail::no_rescale_policy type;
     };
 
     template
