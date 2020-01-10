@@ -23,6 +23,7 @@
 #include <boost/geometry/policies/relate/intersection_points.hpp>
 #include <boost/geometry/policies/relate/tupled.hpp>
 #include <boost/geometry/policies/robustness/rescale_policy_tags.hpp>
+#include <boost/geometry/policies/robustness/robust_type.hpp>
 #include <boost/geometry/strategies/intersection_result.hpp>
 
 namespace boost { namespace geometry {
@@ -247,20 +248,10 @@ public:
     typedef segment_intersection_points
         <
             TurnPoint,
-            geometry::segment_ratio<boost::long_long_type>
-            /*geometry::segment_ratio
+            geometry::segment_ratio
                 <
-                    boost::multiprecision::number
-                        <
-                            boost::multiprecision::cpp_int_backend
-                                <
-                                    64, 256,
-                                    boost::multiprecision::signed_magnitude,
-                                    boost::multiprecision::unchecked,
-                                    void
-                                >
-                        >
-                >*/
+                    geometry::detail::robust_signed_integral_type
+                >
         > intersection_point_type;
     typedef policies::relate::segments_tupled
         <
