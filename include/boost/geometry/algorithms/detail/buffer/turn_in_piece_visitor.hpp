@@ -3,8 +3,8 @@
 // Copyright (c) 2012-2014 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2017 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2016, 2018.
-// Modifications copyright (c) 2016-2018 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2016, 2018, 2020.
+// Modifications copyright (c) 2016-2020 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -909,6 +909,14 @@ public:
                     typename Turn::robust_point_type
                 >::type distance_type;
 
+            // TODO: The problem may occur when non-fundamental integral type
+            // (like multiprecision::number) is used as coordinate_type
+            // then distance_type result is of the same integral type
+            // because UD coordinate types are assumed to be capable of
+            // storing the result of any algorithm (assumed to be floating point).
+            // For now the util calculation_type is modified to reckognize
+            // and treat multiprecision::number<cpp_int_backend> in a special way
+            // in all algorithms, just in case.
             distance_type const cd
                 = geometry::comparable_distance(piece.robust_center,
                         turn.robust_point);

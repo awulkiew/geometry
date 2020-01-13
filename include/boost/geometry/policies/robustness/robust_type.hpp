@@ -20,7 +20,15 @@
 #include <boost/config.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 
+
+#define BOOST_GEOMETRY_ROBUST_TYPE_USE_MULTIPRECISION
+
+
+//#ifdef BOOST_GEOMETRY_ROBUST_TYPE_USE_MULTIPRECISION
+
 #include <boost/multiprecision/cpp_int.hpp>
+
+//#endif
 
 
 namespace boost { namespace geometry
@@ -31,7 +39,11 @@ namespace boost { namespace geometry
 namespace detail
 {
 
-//typedef boost::long_long_type robust_signed_integral_type;
+#ifndef BOOST_GEOMETRY_ROBUST_TYPE_USE_MULTIPRECISION
+
+typedef boost::long_long_type robust_signed_integral_type;
+
+#else
 
 typedef boost::multiprecision::number
     <
@@ -43,6 +55,8 @@ typedef boost::multiprecision::number
                 void
             >
     > robust_signed_integral_type;
+
+#endif
 
 }
 

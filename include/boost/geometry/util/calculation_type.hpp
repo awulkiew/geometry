@@ -4,8 +4,8 @@
 // Copyright (c) 2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2012 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2018.
-// Modifications copyright (c) 2018, Oracle and/or its affiliates.
+// This file was modified by Oracle on 2018, 2020.
+// Modifications copyright (c) 2018, 2020, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -26,6 +26,8 @@
 #include <boost/geometry/util/select_coordinate_type.hpp>
 #include <boost/geometry/util/select_most_precise.hpp>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 
 namespace boost { namespace geometry
 {
@@ -44,6 +46,34 @@ struct default_integral
     typedef int type;
 #endif
 };
+
+template <typename Type>
+struct is_multiprecision_integral
+    : boost::false_type
+{};
+
+template
+<
+    unsigned MinBits, unsigned MaxBits,
+    boost::multiprecision::cpp_integer_type SignType,
+    boost::multiprecision::cpp_int_check_type Checked,
+    class Allocator
+>
+struct is_multiprecision_integral
+    <
+        boost::multiprecision::number
+            <
+                boost::multiprecision::cpp_int_backend
+                    <
+                        MinBits, MaxBits,
+                        SignType,
+                        Checked,
+                        Allocator
+                    >
+            >
+    >
+    : boost::true_type
+{};
 
 /*!
 \details Selects the most appropriate:
@@ -86,10 +116,21 @@ struct calculation_type
                             DefaultFloatingPointCalculationType,
                             Type
                         >::type,
-                    typename select_most_precise
+                    typename boost::mpl::if_c
                         <
+                            is_multiprecision_integral<Type>::value,
+                            // TODO: This is not fully correct since Multiprecision type
+                            // will most likely be more precise than the DefaultIntegralCalculationType
+                            // but the problem is that DefaultIntegralCalculationType is not always
+                            // integral. This is a workaround for comparable_distance() calculation_type
+                            // implemetation passing double here. E.g. checking a static_assert above
+                            // boost::is_integral<DefaultIntegralCalculationType>::value would be a start.
                             DefaultIntegralCalculationType,
-                            Type
+                            typename select_most_precise
+                                <
+                                    DefaultIntegralCalculationType,
+                                    Type
+                                >::type
                         >::type
                 >::type,
             CalculationType
