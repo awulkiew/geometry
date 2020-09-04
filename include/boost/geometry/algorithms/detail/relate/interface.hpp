@@ -88,13 +88,14 @@ struct interruption_enabled
 template <typename Geometry1,
           typename Geometry2,
           typename Result,
+          bool IsTuple = geometry::tuples::is_tuple<Result>::value,
           bool IsSequence = boost::mpl::is_sequence<Result>::value>
 struct result_handler_type
     : not_implemented<Result>
 {};
 
 template <typename Geometry1, typename Geometry2>
-struct result_handler_type<Geometry1, Geometry2, geometry::de9im::mask, false>
+struct result_handler_type<Geometry1, Geometry2, geometry::de9im::mask, false, false>
 {
     typedef mask_handler
         <
@@ -107,12 +108,12 @@ struct result_handler_type<Geometry1, Geometry2, geometry::de9im::mask, false>
         > type;
 };
 
-template <typename Geometry1, typename Geometry2, typename Head, typename Tail>
-struct result_handler_type<Geometry1, Geometry2, boost::tuples::cons<Head, Tail>, false>
+template <typename Geometry1, typename Geometry2, typename Tuple>
+struct result_handler_type<Geometry1, Geometry2, Tuple, true, false>
 {
     typedef mask_handler
         <
-            boost::tuples::cons<Head, Tail>,
+            Tuple,
             interruption_enabled
                 <
                     Geometry1,
@@ -130,6 +131,7 @@ struct result_handler_type
         Geometry1,
         Geometry2,
         geometry::de9im::static_mask<II, IB, IE, BI, BB, BE, EI, EB, EE>,
+        false,
         false
     >
 {
@@ -145,7 +147,7 @@ struct result_handler_type
 };
 
 template <typename Geometry1, typename Geometry2, typename StaticSequence>
-struct result_handler_type<Geometry1, Geometry2, StaticSequence, true>
+struct result_handler_type<Geometry1, Geometry2, StaticSequence, false, true>
 {
     typedef static_mask_handler
         <

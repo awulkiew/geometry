@@ -1,7 +1,7 @@
 // Boost.Geometry
 // Unit Test
 
-// Copyright (c) 2019 Oracle and/or its affiliates.
+// Copyright (c) 2019-2020 Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
@@ -90,8 +90,8 @@ void test_all()
     BOOST_CHECK_EQUAL((bgt::find_index_if<tuple_id, is_float>::value), 2);
     BOOST_CHECK((boost::is_same<typename bgt::find_if<tuple_id, is_float>::type, boost::tuples::null_type>::value));
 
-    typedef typename bgt::push_back<tuple_id, float>::type tuple_idf;
-    tuple_idf tup_idf = bgt::push_back<tuple_id, float>::apply(tup_id, 3.0f);
+    typedef bgt::push_back_t<tuple_id, float> tuple_idf;
+    tuple_idf tup_idf = bgt::push_back<tuple_id, float>(tup_id, 3.0f);
 
     BOOST_CHECK_EQUAL((bgt::get<0>(tup_idf)), 1);
     BOOST_CHECK_EQUAL((bgt::get<1>(tup_idf)), 2.0);
@@ -111,7 +111,7 @@ void test_all()
 
 #if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 
-    tup_idf = bgt::push_back<tuple_id, float>::apply(std::move(tup_id), 3.0f);
+    tup_idf = bgt::push_back<tuple_id, float>(std::move(tup_id), 3.0f);
 
     BOOST_CHECK_EQUAL((bgt::get<0>(tup_idf)), 1);
     BOOST_CHECK_EQUAL((bgt::get<1>(tup_idf)), 2.0);

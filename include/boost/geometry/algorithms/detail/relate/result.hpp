@@ -30,12 +30,12 @@
 #include <boost/mpl/size.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <boost/geometry/core/assert.hpp>
 #include <boost/geometry/core/coordinate_dimension.hpp>
 #include <boost/geometry/core/exception.hpp>
 #include <boost/geometry/util/condition.hpp>
+#include <boost/geometry/util/tuples.hpp>
 
 namespace boost { namespace geometry {
 
@@ -280,7 +280,12 @@ private:
 
 // interrupt()
 
-template <typename Mask, bool InterruptEnabled>
+template
+<
+    typename Mask,
+    bool InterruptEnabled,
+    bool IsTuple = geometry::tuples::is_tuple<Mask>::value
+>
 struct interrupt_dispatch
 {
     template <field F1, field F2, char V>
@@ -291,7 +296,7 @@ struct interrupt_dispatch
 };
 
 template <typename Mask>
-struct interrupt_dispatch<Mask, true>
+struct interrupt_dispatch<Mask, true, false>
 {
     template <field F1, field F2, char V>
     static inline bool apply(Mask const& mask)
@@ -315,14 +320,14 @@ struct interrupt_dispatch<Mask, true>
     }
 };
 
-template <typename Masks, int I = 0, int N = boost::tuples::length<Masks>::value>
+template <typename Masks, int I = 0, int N = geometry::tuples::size<Masks>::value>
 struct interrupt_dispatch_tuple
 {
     template <field F1, field F2, char V>
     static inline bool apply(Masks const& masks)
     {
-        typedef typename boost::tuples::element<I, Masks>::type mask_type;
-        mask_type const& mask = boost::get<I>(masks);
+        typedef typename geometry::tuples::element<I, Masks>::type mask_type;
+        mask_type const& mask = geometry::tuples::get<I>(masks);
         return interrupt_dispatch<mask_type, true>::template apply<F1, F2, V>(mask)
             && interrupt_dispatch_tuple<Masks, I+1>::template apply<F1, F2, V>(masks);
     }
@@ -338,23 +343,10 @@ struct interrupt_dispatch_tuple<Masks, N, N>
     }
 };
 
-//template <typename T0, typename T1, typename T2, typename T3, typename T4,
-//          typename T5, typename T6, typename T7, typename T8, typename T9>
-//struct interrupt_dispatch<boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>, true>
-//{
-//    typedef boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> mask_type;
-
-//    template <field F1, field F2, char V>
-//    static inline bool apply(mask_type const& mask)
-//    {
-//        return interrupt_dispatch_tuple<mask_type>::template apply<F1, F2, V>(mask);
-//    }
-//};
-
-template <typename Head, typename Tail>
-struct interrupt_dispatch<boost::tuples::cons<Head, Tail>, true>
+template <typename Tuple>
+struct interrupt_dispatch<Tuple, true, true>
 {
-    typedef boost::tuples::cons<Head, Tail> mask_type;
+    typedef Tuple mask_type;
 
     template <field F1, field F2, char V>
     static inline bool apply(mask_type const& mask)
@@ -372,7 +364,7 @@ inline bool interrupt(Mask const& mask)
 
 // may_update()
 
-template <typename Mask>
+template <typename Mask, bool IsTuple = geometry::tuples::is_tuple<Mask>::value>
 struct may_update_dispatch
 {
     template <field F1, field F2, char D, typename Matrix>
@@ -401,14 +393,14 @@ struct may_update_dispatch
     }
 };
 
-template <typename Masks, int I = 0, int N = boost::tuples::length<Masks>::value>
+template <typename Masks, int I = 0, int N = geometry::tuples::size<Masks>::value>
 struct may_update_dispatch_tuple
 {
     template <field F1, field F2, char D, typename Matrix>
     static inline bool apply(Masks const& masks, Matrix const& matrix)
     {
-        typedef typename boost::tuples::element<I, Masks>::type mask_type;
-        mask_type const& mask = boost::get<I>(masks);
+        typedef typename geometry::tuples::element<I, Masks>::type mask_type;
+        mask_type const& mask = geometry::tuples::get<I>(masks);
         return may_update_dispatch<mask_type>::template apply<F1, F2, D>(mask, matrix)
             || may_update_dispatch_tuple<Masks, I+1>::template apply<F1, F2, D>(masks, matrix);
     }
@@ -424,23 +416,10 @@ struct may_update_dispatch_tuple<Masks, N, N>
     }
 };
 
-//template <typename T0, typename T1, typename T2, typename T3, typename T4,
-//          typename T5, typename T6, typename T7, typename T8, typename T9>
-//struct may_update_dispatch< boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> >
-//{
-//    typedef boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> mask_type;
-
-//    template <field F1, field F2, char D, typename Matrix>
-//    static inline bool apply(mask_type const& mask, Matrix const& matrix)
-//    {
-//        return may_update_dispatch_tuple<mask_type>::template apply<F1, F2, D>(mask, matrix);
-//    }
-//};
-
-template <typename Head, typename Tail>
-struct may_update_dispatch< boost::tuples::cons<Head, Tail> >
+template <typename Tuple>
+struct may_update_dispatch<Tuple, true>
 {
-    typedef boost::tuples::cons<Head, Tail> mask_type;
+    typedef Tuple mask_type;
 
     template <field F1, field F2, char D, typename Matrix>
     static inline bool apply(mask_type const& mask, Matrix const& matrix)
@@ -458,7 +437,7 @@ inline bool may_update(Mask const& mask, Matrix const& matrix)
 
 // check_matrix()
 
-template <typename Mask>
+template <typename Mask, bool IsTuple = geometry::tuples::is_tuple<Mask>::value>
 struct check_dispatch
 {
     template <typename Matrix>
@@ -498,14 +477,14 @@ struct check_dispatch
     }
 };
 
-template <typename Masks, int I = 0, int N = boost::tuples::length<Masks>::value>
+template <typename Masks, int I = 0, int N = geometry::tuples::size<Masks>::value>
 struct check_dispatch_tuple
 {
     template <typename Matrix>
     static inline bool apply(Masks const& masks, Matrix const& matrix)
     {
-        typedef typename boost::tuples::element<I, Masks>::type mask_type;
-        mask_type const& mask = boost::get<I>(masks);
+        typedef typename geometry::tuples::element<I, Masks>::type mask_type;
+        mask_type const& mask = geometry::tuples::get<I>(masks);
         return check_dispatch<mask_type>::apply(mask, matrix)
             || check_dispatch_tuple<Masks, I+1>::apply(masks, matrix);
     }
@@ -521,23 +500,10 @@ struct check_dispatch_tuple<Masks, N, N>
     }
 };
 
-//template <typename T0, typename T1, typename T2, typename T3, typename T4,
-//          typename T5, typename T6, typename T7, typename T8, typename T9>
-//struct check_dispatch< boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> >
-//{
-//    typedef boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> mask_type;
-
-//    template <typename Matrix>
-//    static inline bool apply(mask_type const& mask, Matrix const& matrix)
-//    {
-//        return check_dispatch_tuple<mask_type>::apply(mask, matrix);
-//    }
-//};
-
-template <typename Head, typename Tail>
-struct check_dispatch< boost::tuples::cons<Head, Tail> >
+template <typename Tuple>
+struct check_dispatch<Tuple, true>
 {
-    typedef boost::tuples::cons<Head, Tail> mask_type;
+    typedef Tuple mask_type;
 
     template <typename Matrix>
     static inline bool apply(mask_type const& mask, Matrix const& matrix)
@@ -554,19 +520,26 @@ inline bool check_matrix(Mask const& mask, Matrix const& matrix)
 
 // matrix_width
 
-template <typename MatrixOrMask>
+template
+<
+    typename MatrixOrMask,
+    bool IsTuple = geometry::tuples::is_tuple<MatrixOrMask>::value
+>
 struct matrix_width
 {
     static const std::size_t value = MatrixOrMask::static_width;
 };
 
-template <typename Tuple,
-          int I = 0,
-          int N = boost::tuples::length<Tuple>::value>
+template
+<
+    typename Tuple,
+    int I = 0,
+    int N = geometry::tuples::size<Tuple>::value
+>
 struct matrix_width_tuple
 {
     static const std::size_t
-        current = matrix_width<typename boost::tuples::element<I, Tuple>::type>::value;
+        current = matrix_width<typename geometry::tuples::element<I, Tuple>::type>::value;
     static const std::size_t
         next = matrix_width_tuple<Tuple, I+1>::value;
 
@@ -580,11 +553,11 @@ struct matrix_width_tuple<Tuple, N, N>
     static const std::size_t value = 0;
 };
 
-template <typename Head, typename Tail>
-struct matrix_width< boost::tuples::cons<Head, Tail> >
+template <typename Tuple>
+struct matrix_width<Tuple, true>
 {
     static const std::size_t
-        value = matrix_width_tuple< boost::tuples::cons<Head, Tail> >::value;
+        value = matrix_width_tuple<Tuple>::value;
 };
 
 // mask_handler

@@ -10,7 +10,6 @@
 #define BOOST_GEOMETRY_ALGORITHMS_DETAIL_TUPLED_OUTPUT_HPP
 
 #include <boost/geometry/algorithms/convert.hpp>
-#include <boost/geometry/core/config.hpp>
 #include <boost/geometry/core/tag.hpp>
 #include <boost/geometry/core/tag_cast.hpp>
 #include <boost/geometry/core/tags.hpp>
@@ -86,44 +85,8 @@ struct is_tupled_single_output_check
 
 
 // true if Output is boost::tuple, boost::tuples::cons, std::pair or std::tuple
-template <typename T>
-struct is_tupled
-    : bool_constant<false>
-{};
-
-template
-<
-    class T0, class T1, class T2, class T3, class T4,
-    class T5, class T6, class T7, class T8, class T9
->
-struct is_tupled<boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> >
-    : bool_constant<true>
-{};
-
-template <typename HT, typename TT>
-struct is_tupled<boost::tuples::cons<HT, TT> >
-    : bool_constant<true>
-{};
-
-template <typename F, typename S>
-struct is_tupled<std::pair<F, S> >
-    : bool_constant<true>
-{};
-
-#ifdef BOOST_GEOMETRY_CXX11_TUPLE
-
-template <typename ...Ts>
-struct is_tupled<std::tuple<Ts...> >
-    : bool_constant<true>
-{};
-
-#endif // BOOST_GEOMETRY_CXX11_TUPLE
-
-
-
-// true if Output is boost::tuple, boost::tuples::cons, std::pair or std::tuple
 // and is_tupled_output_check defiend above passes
-template <typename Output, bool IsTupled = is_tupled<Output>::value>
+template <typename Output, bool IsTupled = geometry::tuples::is_tuple<Output>::value>
 struct is_tupled_output
     : bool_constant<false>
 {};
@@ -136,7 +99,7 @@ struct is_tupled_output<Output, true>
 
 // true if T is boost::tuple, boost::tuples::cons, std::pair or std::tuple
 // and is_tupled_single_output_check defiend above passes
-template <typename T, bool IsTupled = is_tupled<T>::value>
+template <typename T, bool IsTupled = geometry::tuples::is_tuple<T>::value>
 struct is_tupled_single_output
     : bool_constant<false>
 {};
@@ -242,15 +205,12 @@ struct tupled_range_values<std::pair<F, S> >
         > type;
 };
 
-#ifdef BOOST_GEOMETRY_CXX11_TUPLE
 
 template <typename ...Ts>
 struct tupled_range_values<std::tuple<Ts...> >
 {
     typedef std::tuple<typename boost::range_value<Ts>::type...> type;
 };
-
-#endif // BOOST_GEOMETRY_CXX11_TUPLE
 
 
 // util defining a type and creating a tuple holding back-insert-iterators to
@@ -309,7 +269,6 @@ struct tupled_back_inserters<std::pair<F, S> >
     }
 };
 
-#ifdef BOOST_GEOMETRY_CXX11_TUPLE
 
 template <typename Is, typename Tuple>
 struct tupled_back_inserters_st;
@@ -333,8 +292,6 @@ struct tupled_back_inserters<std::tuple<Ts...> >
             std::tuple<Ts...>
         >
 {};
-
-#endif // BOOST_GEOMETRY_CXX11_TUPLE
 
 
 template
@@ -489,14 +446,11 @@ struct output_geometry_concept_check<boost::tuples::cons<HT, TT> >
     : output_geometry_concept_check_t<boost::tuples::cons<HT, TT> >
 {};
 
-#ifdef BOOST_GEOMETRY_CXX11_TUPLE
 
 template <typename ...Ts>
 struct output_geometry_concept_check<std::tuple<Ts...> >
     : output_geometry_concept_check_t<std::tuple<Ts...> >
 {};
-
-#endif // BOOST_GEOMETRY_CXX11_TUPLE
 
 
 struct tupled_output_tag {};

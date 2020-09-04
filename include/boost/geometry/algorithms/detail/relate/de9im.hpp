@@ -185,36 +185,17 @@ struct push_back<Seq, T, false>
 namespace de9im
 {
 
-inline
-boost::tuples::cons
-    <
-        mask,
-        boost::tuples::cons<mask, boost::tuples::null_type>
-    >
+inline std::pair<mask, mask>
 operator||(mask const& m1, mask const& m2)
 {
-    namespace bt = boost::tuples;
-
-    return bt::cons<mask, bt::cons<mask, bt::null_type> >
-        ( m1, bt::cons<mask, bt::null_type>(m2, bt::null_type()) );
+    return std::pair<mask, mask>(m1, m2);
 }
 
-template <typename Tail>
-inline
-typename geometry::tuples::push_back
-    <
-        boost::tuples::cons<mask, Tail>,
-        mask
-    >::type
-operator||(boost::tuples::cons<mask, Tail> const& t, mask const& m)
+template <typename Tuple>
+inline geometry::tuples::push_back_t<Tuple, mask>
+operator||(Tuple const& t, mask const& m)
 {
-    namespace bt = boost::tuples;
-
-    return geometry::tuples::push_back
-            <
-                bt::cons<mask, Tail>,
-                mask
-            >::apply(t, m);
+    return geometry::tuples::push_back(t, m);
 }
 
 template
