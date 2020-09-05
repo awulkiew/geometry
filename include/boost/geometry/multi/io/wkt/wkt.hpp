@@ -4,6 +4,10 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 
+// This file was modified by Oracle on 2020.
+// Modifications copyright (c) 2020, Oracle and/or its affiliates.
+// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
+
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
 // (geolib/GGL), copyright (c) 1995-2010 Geodan, Amsterdam, the Netherlands.
 
@@ -14,7 +18,11 @@
 #ifndef BOOST_GEOMETRY_MULTI_IO_WKT_WKT_HPP
 #define BOOST_GEOMETRY_MULTI_IO_WKT_WKT_HPP
 
-#include <boost/geometry/io/wkt/read.hpp>
-#include <boost/geometry/io/wkt/write.hpp>
+
+#include <boost/config/header_deprecated.hpp>
+BOOST_HEADER_DEPRECATED("<boost/geometry/io/wkt/wkt.hpp>")
+
+#include <boost/geometry/io/wkt/wkt.hpp>
+
 
 #endif // BOOST_GEOMETRY_MULTI_IO_WKT_WKT_HPP

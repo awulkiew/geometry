@@ -5,6 +5,10 @@
 // Copyright (c) 2009-2013 Mateusz Loskot, London, UK.
 // Copyright (c) 2013 Adam Wulkiewicz, Lodz, Poland.
 
+// This file was modified by Oracle on 2020.
+// Modifications copyright (c) 2020, Oracle and/or its affiliates.
+// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
+
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -12,8 +16,9 @@
 #ifndef BOOST_GEOMETRY_MULTI_ALGORITHMS_DETAIL_EXTREME_POINTS_HPP
 #define BOOST_GEOMETRY_MULTI_ALGORITHMS_DETAIL_EXTREME_POINTS_HPP
 
+#include <boost/config/header_deprecated.hpp>
+BOOST_HEADER_DEPRECATED("<boost/geometry/algorithms/detail/extreme_points.hpp>")
 
 #include <boost/geometry/algorithms/detail/extreme_points.hpp>
-
 
 #endif // BOOST_GEOMETRY_MULTI_ALGORITHMS_DETAIL_EXTREME_POINTS_HPP

@@ -4,9 +4,9 @@
 // Copyright (c) 2008-2014 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2014 Mateusz Loskot, London, UK.
 
-// This file was modified by Oracle on 2014.
-// Modifications copyright (c) 2014, Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2014-2020.
+// Modifications copyright (c) 2014-2020, Oracle and/or its affiliates.
+// Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 // Contributed and/or modified by Menelaos Karavelas, on behalf of Oracle
 
 // Parts of Boost.Geometry are redesigned from Geodan's Geographic Library
@@ -19,8 +19,8 @@
 #ifndef BOOST_GEOMETRY_MULTI_ALGORITHMS_DISTANCE_HPP
 #define BOOST_GEOMETRY_MULTI_ALGORITHMS_DISTANCE_HPP
 
-// this file is intentionally empty (with the exception of the #include below)
-// it is used for backward compatinility and may be removed in the future
+#include <boost/config/header_deprecated.hpp>
+BOOST_HEADER_DEPRECATED("<boost/geometry/algorithms/distance.hpp>")
 
 #include <boost/geometry/algorithms/distance.hpp>
 
