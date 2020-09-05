@@ -11,9 +11,8 @@
 #define BOOST_GEOMETRY_STRATEGIES_GEOGRAPHIC_ENVELOPE_HPP
 
 
-#include <boost/config/pragma_message.hpp>
-BOOST_PRAGMA_MESSAGE("This include file is deprecated and will be removed in the future.")
-
+#include <boost/config/header_deprecated.hpp>
+BOOST_HEADER_DEPRECATED("<boost/geometry/strategy/geographic/envelope.hpp>")
 
 #include <boost/geometry/strategy/geographic/envelope.hpp>
 
