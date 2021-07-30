@@ -4,8 +4,8 @@
 //
 // Copyright (c) 2011-2015 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019-2020.
-// Modifications copyright (c) 2019-2020 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019-2021.
+// Modifications copyright (c) 2019-2021 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -14,10 +14,6 @@
 
 #ifndef BOOST_GEOMETRY_INDEX_DETAIL_RTREE_VISITORS_INSERT_HPP
 #define BOOST_GEOMETRY_INDEX_DETAIL_RTREE_VISITORS_INSERT_HPP
-
-#ifdef BOOST_GEOMETRY_INDEX_EXPERIMENTAL_ENLARGE_BY_EPSILON
-#include <type_traits>
-#endif
 
 #include <boost/geometry/algorithms/detail/expand_by_epsilon.hpp>
 #include <boost/geometry/core/static_assert.hpp>
@@ -217,6 +213,81 @@ public:
     }
 };
 
+template <typename Members, typename Node, typename TraverseData>
+inline void split_node(Members & members, Node & n, TraverseData & td)
+{
+    using box_type = typename Members::box_type;
+    using allocators_type = typename Members::allocators_type;
+    using internal_node = typename Members::internal_node;
+    using node_pointer = typename allocators_type::node_pointer;
+
+    auto const& params = members.parameters();
+    auto const& tr = members.translator();
+    auto& allocs = members.allocators();
+
+    typename rtree::split<Members>::nodes_container_type additional_nodes;
+    box_type n_box;
+
+    rtree::split<Members>::apply(additional_nodes, n, n_box, params, tr, allocs);                // MAY THROW (V, E: alloc, copy, N:alloc)
+
+    BOOST_GEOMETRY_INDEX_ASSERT(additional_nodes.size() == 1, "unexpected number of additional nodes");
+
+    // TODO add all additional nodes
+    // For kmeans algorithm:
+    // elements number may be greater than node max elements count
+    // split and reinsert must take node with some elements count
+    // and container of additional elements (std::pair<Box, node*>s or Values)
+    // and translator + allocators
+    // where node_elements_count + additional_elements > node_max_elements_count
+    // What with elements other than std::pair<Box, node*> ?
+    // Implement template <node_tag> struct node_element_type or something like that
+
+    // for exception safety
+    rtree::subtree_destroyer<Members> additional_node_destroyer(additional_nodes[0].second, allocs);
+
+    // node is not the root - just add the new node
+    if (td.parent)
+    {
+        auto & parent_elements = rtree::elements(*td.parent);
+        // update old node's box
+        parent_elements[td.element_index].first = n_box;
+        // add new node to parent's children
+        parent_elements.push_back(additional_nodes[0]);                                     // MAY THROW, STRONG (V, E: alloc, copy)
+    }
+    // node is the root - add level
+    else
+    {
+        // TODO - there is no need to cast internal_node to node_pointer and then back to internal_node
+
+        BOOST_GEOMETRY_INDEX_ASSERT(&n == &rtree::get<Node>(*members.root), "node should be the root");
+
+        // create new root and add nodes
+        node_pointer new_root = rtree::create_node<allocators_type, internal_node>::apply(allocs); // MAY THROW, STRONG (N:alloc)
+        rtree::subtree_destroyer<Members> new_root_destroyer(new_root, allocs);
+        auto& new_root_elements = rtree::elements(rtree::get<internal_node>(*new_root));
+
+        BOOST_TRY
+        {
+            new_root_elements.push_back(rtree::make_ptr_pair(n_box, members.root));         // MAY THROW, STRONG (E:alloc, copy)
+            new_root_elements.push_back(additional_nodes[0]);                           // MAY THROW, STRONG (E:alloc, copy)
+        }
+        BOOST_CATCH(...)
+        {
+            // clear new root to not delete in the ~subtree_destroyer() potentially stored old root node
+            new_root_elements.clear();
+            BOOST_RETHROW                                                                                           // RETHROW
+        }
+        BOOST_CATCH_END
+
+        members.root = new_root;
+        ++members.leafs_level;
+
+        new_root_destroyer.release();
+    }
+
+    additional_node_destroyer.release();
+}
+
 // ----------------------------------------------------------------------- //
 
 namespace visitors { namespace detail {
@@ -319,21 +390,6 @@ protected:
         index::detail::bounds(rtree::element_indexable(m_element, m_translator),
                               m_element_bounds,
                               index::detail::get_strategy(m_parameters));
-
-#ifdef BOOST_GEOMETRY_INDEX_EXPERIMENTAL_ENLARGE_BY_EPSILON
-        // Enlarge it in case if it's not bounding geometry type.
-        // It's because Points and Segments are compared WRT machine epsilon
-        // This ensures that leafs bounds correspond to the stored elements
-        if (BOOST_GEOMETRY_CONDITION((
-                std::is_same<Element, value_type>::value
-             && ! index::detail::is_bounding_geometry
-                    <
-                        typename indexable_type<translator_type>::type
-                    >::value )) )
-        {
-            geometry::detail::expand_by_epsilon(m_element_bounds);
-        }
-#endif
     }
 
     template <typename Visitor>
@@ -416,22 +472,6 @@ protected:
 
         // for exception safety
         subtree_destroyer additional_node_ptr(additional_nodes[0].second, m_allocators);
-
-#ifdef BOOST_GEOMETRY_INDEX_EXPERIMENTAL_ENLARGE_BY_EPSILON
-        // Enlarge bounds of a leaf node.
-        // It's because Points and Segments are compared WRT machine epsilon
-        // This ensures that leafs' bounds correspond to the stored elements.
-        if (BOOST_GEOMETRY_CONDITION((
-                std::is_same<Node, leaf>::value
-             && ! index::detail::is_bounding_geometry
-                    <
-                        typename indexable_type<translator_type>::type
-                    >::value )))
-        {
-            geometry::detail::expand_by_epsilon(n_box);
-            geometry::detail::expand_by_epsilon(additional_nodes[0].first);
-        }
-#endif
 
         // node is not the root - just add the new node
         if ( !m_traverse_data.current_is_root() )
@@ -624,6 +664,147 @@ public:
         base::post_traverse(n);                                                                                     // MAY THROW (V: alloc, copy, N: alloc)
     }
 };
+
+
+
+// NOTE: if this is reimplemented with manual stack then
+//       throwing exception by the stack has to be taken into account.
+template <typename MembersHolder, typename InternalF, typename LeafF, typename InternalPostF>
+class insert_traverse_impl
+{
+    using internal_node = typename MembersHolder::internal_node;
+    using leaf = typename MembersHolder::leaf;
+    using node_pointer = typename MembersHolder::node_pointer;
+    using size_type = typename MembersHolder::size_type;
+
+    struct traverse_data
+    {
+        internal_node * parent;
+        size_type element_index;
+        size_type reverse_level;
+    };
+
+public:
+    insert_traverse_impl(InternalF internal_f, LeafF leaf_f, InternalPostF internal_post_f)
+        : m_internal_f(internal_f), m_leaf_f(leaf_f), m_internal_post_f(internal_post_f)
+    {}
+
+    void apply(node_pointer ptr, size_type reverse_level) const
+    {
+        traverse_data td = {nullptr, 0, reverse_level};
+        apply(ptr, td);
+    }
+
+    void apply(MembersHolder const& members) const
+    {
+        traverse_data td = {nullptr, 0, members.leafs_level};
+        apply(members.root, td);
+    }
+
+private:
+    void apply(node_pointer ptr, traverse_data const& td) const
+    {
+        if (td.reverse_level > 0)
+        {
+            internal_node& n = rtree::get<internal_node>(*ptr);
+
+            size_type child_index = m_internal_f(n, td);
+            
+            traverse_data next_td = {boost::addressof(n), child_index, td.reverse_level - 1};
+            
+            apply(rtree::elements(n)[child_index].second, next_td);
+
+            m_internal_post_f(n, td);
+        }
+        else
+        {
+            leaf& n = rtree::get<leaf>(*ptr);
+
+            m_leaf_f(n, td);
+        }
+    }
+
+    InternalF m_internal_f;
+    LeafF m_leaf_f;
+    InternalPostF m_internal_post_f;
+};
+
+template <typename MembersHolder, typename InternalF, typename LeafF, typename InternalPostF>
+inline void insert_traverse(MembersHolder & members, InternalF internal_f, LeafF leaf_f, InternalPostF internal_post_f)
+{
+    insert_traverse_impl
+        <
+            MembersHolder, InternalF, LeafF, InternalPostF
+        >(internal_f, leaf_f, internal_post_f).apply(members);
+}
+
+
+template <typename MembersHolder, typename NodeElement, std::enable_if_t<std::is_same<typename MembersHolder::options_type::insert_tag, insert_reinsert_tag>::value, int> = 0>
+inline void call_insert(MembersHolder & members, NodeElement const& node_element, typename MembersHolder::size_type reverse_level = 0)
+{
+    insert<NodeElement, MembersHolder>
+        insert_v(members.root, members.leafs_level, node_element,
+                 members.parameters(), members.translator(), members.allocators(),
+                 reverse_level);
+
+    rtree::apply_visitor(insert_v, *members.root);
+}
+
+template <typename MembersHolder, std::enable_if_t<std::is_same<typename MembersHolder::options_type::insert_tag, insert_default_tag>::value, int> = 0>
+inline void call_insert(MembersHolder & members, typename MembersHolder::value_type const& value, typename MembersHolder::size_type = 0)
+{
+    auto const& tr = members.translator();
+    auto const& params = members.parameters();
+    auto const& strategy = index::detail::get_strategy(params);
+
+    typename MembersHolder::box_type element_bounds;
+    index::detail::bounds(rtree::element_indexable(value, tr),
+                          element_bounds,
+                          strategy);
+
+    // depth-first one-path traverse
+    insert_traverse(members,
+        [&](auto& in, auto& td)
+        {
+            // choose next node
+            size_t child_index = rtree::choose_next_node<MembersHolder>
+                ::apply(in,
+                        rtree::element_indexable(value, tr),
+                        params,
+                        td.reverse_level);
+
+            // expand the node to contain value
+            index::detail::expand(
+                rtree::elements(in)[child_index].first,
+                element_bounds,
+                strategy);
+
+            return child_index;
+        },
+        [&](auto& l, auto& td)
+        {
+            rtree::elements(l).push_back(value);                                                              // MAY THROW, STRONG (V: alloc, copy)
+
+            // handle overflow
+            if (params.get_max_elements() < rtree::elements(l).size())
+            {
+                // NOTE: If the exception is thrown current node may contain more than MAX elements or be empty.
+                // Furthermore it may be empty root - internal node.
+                rtree::split_node(members, l, td);                                                                                           // MAY THROW (V: alloc, copy, N:alloc)
+            }
+        },
+        [&](auto& in, auto& td)
+        {
+            // handle overflow
+            if (params.get_max_elements() < rtree::elements(in).size())
+            {
+                // NOTE: If the exception is thrown current node may contain more than MAX elements or be empty.
+                // Furthermore it may be empty root - internal node.
+                rtree::split_node(members, in, td);                                                                                           // MAY THROW (E: alloc, copy, N:alloc)
+            }
+        });
+}
+
 
 }}} // namespace detail::rtree::visitors
 

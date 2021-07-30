@@ -1654,11 +1654,7 @@ private:
         // CONSIDER: alternative - ignore invalid indexable or throw an exception
         BOOST_GEOMETRY_INDEX_ASSERT(detail::is_valid(m_members.translator()(value)), "Indexable is invalid");
 
-        detail::rtree::visitors::insert<value_type, members_holder>
-            insert_v(m_members.root, m_members.leafs_level, value,
-                     m_members.parameters(), m_members.translator(), m_members.allocators());
-
-        detail::rtree::apply_visitor(insert_v, *m_members.root);
+        detail::rtree::visitors::call_insert(m_members, value);
 
 // TODO
 // Think about this: If exception is thrown, may the root be removed?

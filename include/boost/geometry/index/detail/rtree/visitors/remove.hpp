@@ -4,8 +4,8 @@
 //
 // Copyright (c) 2011-2017 Adam Wulkiewicz, Lodz, Poland.
 //
-// This file was modified by Oracle on 2019.
-// Modifications copyright (c) 2019 Oracle and/or its affiliates.
+// This file was modified by Oracle on 2019-2021.
+// Modifications copyright (c) 2019-2021 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 //
 // Use, modification and distribution is subject to the Boost Software License,
@@ -16,6 +16,7 @@
 #define BOOST_GEOMETRY_INDEX_DETAIL_RTREE_VISITORS_REMOVE_HPP
 
 #include <boost/geometry/index/detail/rtree/visitors/destroy.hpp>
+#include <boost/geometry/index/detail/rtree/visitors/insert.hpp>
 #include <boost/geometry/index/detail/rtree/visitors/is_leaf.hpp>
 
 #include <boost/geometry/algorithms/detail/covered_by/interface.hpp>
@@ -73,15 +74,14 @@ public:
 
     inline void operator()(internal_node & n)
     {
-        typedef typename rtree::elements_type<internal_node>::type children_type;
-        children_type & children = rtree::elements(n);
+        auto& elements = rtree::elements(n);
 
         // traverse children which boxes intersects value's box
         internal_size_type child_node_index = 0;
-        for ( ; child_node_index < children.size() ; ++child_node_index )
+        for ( ; child_node_index < elements.size() ; ++child_node_index )
         {
             if ( index::detail::covered_by_bounds(m_translator(m_value),
-                                                  children[child_node_index].first,
+                                                  elements[child_node_index].first,
                                                   index::detail::get_strategy(m_parameters)) )
             {
                 // next traversing step
@@ -93,16 +93,12 @@ public:
         }
 
         // value was found and removed
-        if ( m_is_value_removed )
+        if (m_is_value_removed)
         {
-            typedef typename rtree::elements_type<internal_node>::type elements_type;
-            typedef typename elements_type::iterator element_iterator;
-            elements_type & elements = rtree::elements(n);
-
             // underflow occured - child node should be removed
-            if ( m_is_underflow )
+            if (m_is_underflow)
             {
-                element_iterator underfl_el_it = elements.begin() + child_node_index;
+                auto underfl_el_it = elements.begin() + child_node_index;
                 size_type relative_level = m_leafs_level - m_current_level;
 
                 // move node to the container - store node's relative level as well and return new underflow state
@@ -113,7 +109,7 @@ public:
             }
 
             // n is not root - adjust aabb
-            if ( 0 != m_parent )
+            if (m_parent)
             {
                 // underflow state should be ok here
                 // note that there may be less than min_elems elements in root
@@ -136,13 +132,13 @@ public:
                 // NOTE: if the min elements number is 1, then after underflow
                 //       here the number of elements may be equal to 0
                 //       this can occur only for the last removed element
-                if ( rtree::elements(n).size() <= 1 )
+                if (elements.size() <= 1)
                 {
                     node_pointer root_to_destroy = m_root_node;
-                    if ( rtree::elements(n).size() == 0 )
-                        m_root_node = 0;
+                    if (elements.empty())
+                        m_root_node = nullptr;
                     else
-                        m_root_node = rtree::elements(n)[0].second;
+                        m_root_node = rtree::elements(n).front().second;
                     --m_leafs_level;
 
                     rtree::destroy_node<allocators_type, internal_node>::apply(m_allocators, root_to_destroy);
@@ -153,13 +149,12 @@ public:
 
     inline void operator()(leaf & n)
     {
-        typedef typename rtree::elements_type<leaf>::type elements_type;
-        elements_type & elements = rtree::elements(n);
+        auto & elements = rtree::elements(n);
         
         // find value and remove it
-        for ( typename elements_type::iterator it = elements.begin() ; it != elements.end() ; ++it )
+        for (auto it = elements.begin() ; it != elements.end() ; ++it)
         {
-            if ( m_translator.equals(*it, m_value, index::detail::get_strategy(m_parameters)) )
+            if (m_translator.equals(*it, m_value, index::detail::get_strategy(m_parameters)))
             {
                 rtree::move_from_back(elements, it);                                                           // MAY THROW (V: copy)
                 elements.pop_back();
@@ -169,7 +164,7 @@ public:
         }
 
         // if value was removed
-        if ( m_is_value_removed )
+        if (m_is_value_removed)
         {
             BOOST_GEOMETRY_INDEX_ASSERT(0 < m_parameters.get_min_elements(), "min number of elements is too small");
 
@@ -177,7 +172,7 @@ public:
             m_is_underflow = elements.size() < m_parameters.get_min_elements();
 
             // n is not root - adjust aabb
-            if ( 0 != m_parent )
+            if (m_parent)
             {
                 rtree::elements(*m_parent)[m_current_child_index].first
                     = rtree::values_box<box_type>(elements.begin(), elements.end(), m_translator,
@@ -251,7 +246,7 @@ private:
 
     void reinsert_removed_nodes_elements()
     {
-        typename underflow_nodes::reverse_iterator it = m_underflowed_nodes.rbegin();
+        auto it = m_underflowed_nodes.rbegin();
 
         BOOST_TRY
         {
