@@ -350,21 +350,16 @@ void test_areal()
 
     test_one<Polygon, MultiPolygon, MultiPolygon>("ticket_9081",
         ticket_9081[0], ticket_9081[1],
-        2, 10, 0.0019812556);
+        count_set(2, 4), 10, 0.0019812556);
 
     // Should generate output, even for <float>
+    // For long double two small extra slivers are generated
     test_one<Polygon, MultiPolygon, MultiPolygon>("mail_2019_01_21_johan",
         mail_2019_01_21_johan[2], mail_2019_01_21_johan[3],
-        2, -1, 0.0005889587);
+        count_set(2, 4), -1, 0.0005889587);
 
-    // Very small slice is generated.
-    // qcc-arm reports 1.7791215549400884e-14
-    // With rescaling, generates very small triangle
-    test_one<Polygon, MultiPolygon, MultiPolygon>("ticket_11018",
-        ticket_11018[0], ticket_11018[1],
-        BG_IF_RESCALED(1, 0), 0,
-        1.0e-8, ut_settings(-1)
-    );
+    // Might generate a very small triangle, which is acceptable
+    TEST_INTERSECTION(ticket_11018, count_set(0, 1), 0, expectation_limits(0.0, 4.0e-7));
 
     TEST_INTERSECTION(ticket_12503, 2, 13, 17.375);
 
@@ -374,7 +369,7 @@ void test_areal()
 #endif
 #if ! defined(BOOST_GEOMETRY_USE_KRAMER_RULE) || defined(BOOST_GEOMETRY_TEST_FAILURES)
     // Two cases produce either too large, or no output if Kramer rule is used
-    TEST_INTERSECTION(issue_630_b, 1, -1, BG_IF_KRAMER(0.1714, 0.1713911));
+    TEST_INTERSECTION(issue_630_b, 1, -1, expectation_limits(0.1713911, 0.1714));
     TEST_INTERSECTION(issue_630_c, 1, -1, 0.1770);
 #endif
 
@@ -383,10 +378,12 @@ void test_areal()
     TEST_INTERSECTION(issue_643, 1, -1, 3.4615);
 #endif
 
-    test_one<Polygon, MultiPolygon, MultiPolygon>("mysql_23023665_7",
-        mysql_23023665_7[0], mysql_23023665_7[1],
-        2, 11, 9.80505786783);
+    TEST_INTERSECTION(issue_869_c, 3, -1, 3600);
 
+    TEST_INTERSECTION(issue_888_34, 7, -1, 0.0256838);
+    TEST_INTERSECTION(issue_888_37, 13, -1, 0.0567043);
+
+    TEST_INTERSECTION(mysql_23023665_7, 2, 11, 9.80505786783);
     TEST_INTERSECTION(mysql_23023665_12, 2, 0, 11.812440191387557);
     TEST_INTERSECTION(mysql_regression_1_65_2017_08_31, 2, -1, 29.9022122);
 }
@@ -491,8 +488,6 @@ void test_all()
 #endif
 
     test_point_output<P>();
-    // linear
-
 }
 
 
@@ -503,16 +498,10 @@ int test_main(int, char* [])
 
 #if ! defined(BOOST_GEOMETRY_TEST_ONLY_ONE_TYPE)
     test_all<bg::model::d2::point_xy<float> >();
-
-#if defined(HAVE_TTMATH)
-    std::cout << "Testing TTMATH" << std::endl;
-    test_all<bg::model::d2::point_xy<ttmath_big> >();
-#endif
-
 #endif
 
 #if defined(BOOST_GEOMETRY_TEST_FAILURES)
-    BoostGeometryWriteExpectedFailures(10, 4);
+    BoostGeometryWriteExpectedFailures(9, 1, 2, 1);
 #endif
 
     return 0;
