@@ -62,11 +62,11 @@ struct iterator_type<Ring, ring_tag>
 template <typename Polygon>
 class iterator_type<Polygon, polygon_tag>
 {
-private:
-    typedef typename inner_range_type<Polygon>::type inner_range;
+    using inner_range = typename inner_range_type<Polygon>::type;
+    using inner_iterator = typename iterator_type<inner_range>::type;
 
 public:
-    typedef concatenate_iterator
+    using type = concatenate_iterator
         <
             typename boost::range_iterator<inner_range>::type,
             flatten_iterator
@@ -75,13 +75,15 @@ public:
                         <
                             typename geometry::interior_type<Polygon>::type
                         >::type,
-                    typename iterator_type<inner_range>::type,
+                    inner_iterator,
                     typename value_type<Polygon>::type,
                     dispatch::points_begin<inner_range>,
-                    dispatch::points_end<inner_range>
+                    dispatch::points_end<inner_range>,
+                    typename std::iterator_traits<inner_iterator>::reference
                 >,
-            typename value_type<Polygon>::type
-        > type;
+            typename value_type<Polygon>::type,
+            typename std::iterator_traits<inner_iterator>::reference
+        >;
 };
 
 
@@ -95,36 +97,38 @@ struct iterator_type<MultiPoint, multi_point_tag>
 template <typename MultiLinestring>
 class iterator_type<MultiLinestring, multi_linestring_tag>
 {
-private:
-    typedef typename inner_range_type<MultiLinestring>::type inner_range;
+    using inner_range = typename inner_range_type<MultiLinestring>::type;
+    using inner_iterator = typename iterator_type<inner_range>::type;
 
 public:
-    typedef flatten_iterator
+    using type = flatten_iterator
         <
             typename boost::range_iterator<MultiLinestring>::type,
-            typename iterator_type<inner_range>::type,
+            inner_iterator,
             typename value_type<MultiLinestring>::type,
             dispatch::points_begin<inner_range>,
-            dispatch::points_end<inner_range>
-        > type;
+            dispatch::points_end<inner_range>,
+            typename std::iterator_traits<inner_iterator>::reference
+        >;
 };
 
 
 template <typename MultiPolygon>
 class iterator_type<MultiPolygon, multi_polygon_tag>
 {
-private:
-    typedef typename inner_range_type<MultiPolygon>::type inner_range;
+    using inner_range = typename inner_range_type<MultiPolygon>::type;
+    using inner_iterator = typename iterator_type<inner_range>::type;
 
 public:
-    typedef flatten_iterator
+    using type = flatten_iterator
         <
             typename boost::range_iterator<MultiPolygon>::type,
-            typename iterator_type<inner_range>::type,
+            inner_iterator,
             typename value_type<MultiPolygon>::type,
             dispatch::points_begin<inner_range>,
-            dispatch::points_end<inner_range>
-        > type;
+            dispatch::points_end<inner_range>,
+            typename std::iterator_traits<inner_iterator>::reference
+        >;
 };
 
 

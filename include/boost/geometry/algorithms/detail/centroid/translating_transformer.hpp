@@ -5,9 +5,8 @@
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 // Copyright (c) 2014 Adam Wulkiewicz, Lodz, Poland.
 
-// This file was modified by Oracle on 2014.
-// Modifications copyright (c) 2014 Oracle and/or its affiliates.
-
+// This file was modified by Oracle on 2014-2021.
+// Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Use, modification and distribution is subject to the Boost Software License,
@@ -23,14 +22,12 @@
 #include <boost/core/addressof.hpp>
 #include <boost/core/ref.hpp>
 
+#include <boost/geometry/algorithms/detail/point_on_border.hpp>
+#include <boost/geometry/arithmetic/arithmetic.hpp>
 #include <boost/geometry/core/cs.hpp>
+#include <boost/geometry/core/point_type.hpp>
 #include <boost/geometry/core/tag_cast.hpp>
 #include <boost/geometry/core/tags.hpp>
-#include <boost/geometry/core/point_type.hpp>
-
-#include <boost/geometry/arithmetic/arithmetic.hpp>
-
-#include <boost/geometry/iterators/point_iterator.hpp>
 
 
 namespace boost { namespace geometry
@@ -77,36 +74,37 @@ struct translating_transformer<Geometry, areal_tag, cartesian_tag>
     typedef point_type result_type;
     
     explicit translating_transformer(Geometry const& geom)
-        : m_origin(NULL)
+        : m_is_origin_set(false)
     {
-        geometry::point_iterator<Geometry const>
-            pt_it = geometry::points_begin(geom);
-        if ( pt_it != geometry::points_end(geom) )
-        {
-            m_origin = boost::addressof(*pt_it);
-        }
+        m_is_origin_set = geometry::point_on_border(m_origin, geom);
     }
 
     explicit translating_transformer(point_type const& origin)
-        : m_origin(boost::addressof(origin))
+        : m_origin(origin)
+        , m_is_origin_set(true)
     {}
 
     result_type apply(point_type const& pt) const
     {
         point_type res = pt;
-        if ( m_origin )
-            geometry::subtract_point(res, *m_origin);
+        if (m_is_origin_set)
+        {
+            geometry::subtract_point(res, m_origin);
+        }
         return res;
     }
 
     template <typename ResPt>
     void apply_reverse(ResPt & res_pt) const
     {
-        if ( m_origin )
-            geometry::add_point(res_pt, *m_origin);
+        if (m_is_origin_set)
+        {
+            geometry::add_point(res_pt, m_origin);
+        }
     }
 
-    const point_type * m_origin;
+    point_type m_origin;
+    bool m_is_origin_set;
 };
 
 
