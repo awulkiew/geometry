@@ -163,7 +163,21 @@ struct collected_vector
         T, Geometry, strategy::side::side_by_triangle<CT>, CSTag
     >
     : collected_vector<T, Geometry, strategy::side::side_robust<CT>, CSTag>
-{};  
+{
+    using base_t = collected_vector<T, Geometry, strategy::side::side_robust<CT>, CSTag>;
+
+    collected_vector() = default;
+
+    collected_vector(T const& px, T const& py,
+                     T const& pdx, T const& pdy)
+        : base_t(px, py, pdx, pdy)
+    {}
+
+    template <typename Point>
+    collected_vector(Point const& p1, Point const& p2)
+        : base_t(p1, p2)
+    {}
+};
 
 // Compatible with spherical_side_formula which currently
 // is the default spherical_equatorial and geographic strategy
