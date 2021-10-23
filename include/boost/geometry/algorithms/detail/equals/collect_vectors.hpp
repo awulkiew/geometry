@@ -194,7 +194,7 @@ struct collected_vector
         using namespace geometry::formula;
         prev = sph_to_cart3d<vector_type>(p1);
         next = sph_to_cart3d<vector_type>(p2);
-        direction = cross_product(prev, next);
+        cross = direction = cross_product(prev, next);
     }
 
     bool normalize()
@@ -237,7 +237,7 @@ struct collected_vector
     // and next vector should be passed as parameter
     bool next_is_collinear(collected_vector const& other) const
     {
-        return formula::sph_side_value(direction, other.next) == 0;
+        return formula::sph_side_value(cross, other.next) == 0;
     }
 
     // For std::equals
@@ -250,21 +250,17 @@ struct collected_vector
 
 private:
     // For consistency with side and intersection strategies used by relops
+    // NOTE: alternative would be to equal-compare direction's coordinates
+    //       or to check if dot product of directions is equal to 1.
     bool is_collinear(collected_vector const& other) const
     {
-        return formula::sph_side_value(direction, other.prev) == 0
-            && formula::sph_side_value(direction, other.next) == 0;
+        return formula::sph_side_value(cross, other.prev) == 0
+            && formula::sph_side_value(cross, other.next) == 0;
     }
-    
-    /*bool same_direction(collected_vector const& other) const
-    {
-        return math::equals_with_epsilon(get<0>(direction), get<0>(other.direction))
-            && math::equals_with_epsilon(get<1>(direction), get<1>(other.direction))
-            && math::equals_with_epsilon(get<2>(direction), get<2>(other.direction));
-    }*/
 
     point_type origin; // used for sorting and equality check
-    vector_type direction; // used for sorting, only in operator<
+    vector_type direction; // normalized, used for sorting, only in operator<
+    vector_type cross; // not normalized, used for collinearity check
     vector_type prev; // used for collinearity check, only in operator==
     vector_type next; // used for collinearity check
 };
