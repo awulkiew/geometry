@@ -17,7 +17,6 @@
 #include <boost/geometry/core/assert.hpp>
 #include <boost/geometry/core/point_type.hpp>
 #include <boost/geometry/index/rtree.hpp>
-#include <boost/geometry/strategies/distance.hpp>
 #include <boost/geometry/strategies/distance_result.hpp>
 
 
@@ -234,4 +233,4 @@ struct distance
 }} // namespace boost::geometry
 
 
-#endif // BOOST_GEOMETRY_ALGORITHMS_DETAIL_DISTANCE_SEGMENT_TO_BOX_HPP
+#endif // BOOST_GEOMETRY_ALGORITHMS_DETAIL_DISTANCE_GEOMETRY_COLLECTION_HPP

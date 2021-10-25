@@ -23,15 +23,16 @@
 
 
 #include <boost/geometry/algorithms/detail/disjoint/areal_areal.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/box_box.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/geometry_collection.hpp>
 #include <boost/geometry/algorithms/detail/disjoint/linear_areal.hpp>
 #include <boost/geometry/algorithms/detail/disjoint/linear_linear.hpp>
-#include <boost/geometry/algorithms/detail/disjoint/point_geometry.hpp>
-#include <boost/geometry/algorithms/detail/disjoint/multipoint_geometry.hpp>
-#include <boost/geometry/algorithms/detail/disjoint/point_point.hpp>
-#include <boost/geometry/algorithms/detail/disjoint/point_box.hpp>
-#include <boost/geometry/algorithms/detail/disjoint/box_box.hpp>
-#include <boost/geometry/algorithms/detail/disjoint/segment_box.hpp>
 #include <boost/geometry/algorithms/detail/disjoint/linear_segment_or_box.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/multipoint_geometry.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/point_box.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/point_geometry.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/point_point.hpp>
+#include <boost/geometry/algorithms/detail/disjoint/segment_box.hpp>
 
 #include <boost/geometry/strategies/relate/cartesian.hpp>
 #include <boost/geometry/strategies/relate/geographic.hpp>
