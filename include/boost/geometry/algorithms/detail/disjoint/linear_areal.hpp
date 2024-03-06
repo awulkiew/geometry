@@ -3,7 +3,7 @@
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2014 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2014 Mateusz Loskot, London, UK.
-// Copyright (c) 2013-2014 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2013-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2013-2022.
 // Modifications copyright (c) 2013-2022, Oracle and/or its affiliates.
@@ -61,8 +61,8 @@ namespace detail { namespace disjoint
 {
 
 template <typename Geometry1, typename Geometry2,
-          typename Tag1 = typename tag<Geometry1>::type,
-          typename Tag1OrMulti = typename tag_cast<Tag1, multi_tag>::type>
+          typename Tag1 = tag_t<Geometry1>,
+          typename Tag1OrMulti = tag_cast_t<Tag1, multi_tag>>
 struct disjoint_no_intersections_policy
 {
     /*!
@@ -71,7 +71,7 @@ struct disjoint_no_intersections_policy
     template <typename Strategy>
     static inline bool apply(Geometry1 const& g1, Geometry2 const& g2, Strategy const& strategy)
     {
-        using point_type = typename point_type<Geometry1>::type;
+        using point_type = point_type_t<Geometry1>;
         typename helper_geometry<point_type>::type p;
         geometry::point_on_border(p, g1);
 
@@ -91,7 +91,7 @@ struct disjoint_no_intersections_policy<Geometry1, Geometry2, Tag1, multi_tag>
         // TODO: use partition or rtree on g2
         for (auto it = boost::begin(g1); it != boost::end(g1); ++it)
         {
-            typedef typename boost::range_value<Geometry1 const>::type value_type;
+            using value_type = typename boost::range_value<Geometry1 const>::type;
             if (! disjoint_no_intersections_policy<value_type const, Geometry2>
                     ::apply(*it, g2, strategy))
             {
@@ -131,7 +131,7 @@ template
 <
     typename Segment,
     typename Areal,
-    typename Tag = typename tag<Areal>::type
+    typename Tag = tag_t<Areal>
 >
 struct disjoint_segment_areal
     : not_implemented<Segment, Areal>
@@ -171,7 +171,7 @@ public:
     {
         if (! disjoint_range_segment_or_box
                 <
-                    typename geometry::ring_type<Polygon>::type,
+                    geometry::ring_type_t<Polygon>,
                     Segment
                 >::apply(geometry::exterior_ring(polygon), segment, strategy))
         {
@@ -183,7 +183,7 @@ public:
             return false;
         }
 
-        typename point_type<Segment>::type p;
+        point_type_t<Segment> p;
         detail::assign_point_from_index<0>(segment, p);
 
         return ! geometry::covered_by(p, polygon, strategy);
@@ -219,7 +219,7 @@ struct disjoint_segment_areal<Segment, Ring, ring_tag>
             return false;
         }
 
-        typename point_type<Segment>::type p;
+        point_type_t<Segment> p;
         detail::assign_point_from_index<0>(segment, p);
 
         return ! geometry::covered_by(p, ring, strategy);

@@ -4,7 +4,7 @@
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
 // Copyright (c) 2024 Adam Wulkiewicz, Lodz, Poland.
-// 
+
 // This file was modified by Oracle on 2014-2021.
 // Modifications copyright (c) 2014-2021 Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle

@@ -1,6 +1,6 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2017-2023 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2017-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // Copyright (c) 2014-2023, Oracle and/or its affiliates.
 // Contributed and/or modified by Vissarion Fysikopoulos, on behalf of Oracle
@@ -122,15 +122,14 @@ protected:
                                  VisitPolicy& visitor,
                                  Strategy const& strategy)
         {
-            typedef debug_validity_phase<Polygon> debug_phase;
-            typedef typename ring_type<Polygon>::type ring_type;
+            using debug_phase = debug_validity_phase<Polygon>;
 
             // check validity of exterior ring
             debug_phase::apply(1);
 
             if (! detail::is_valid::is_valid_ring
                      <
-                         ring_type,
+                         ring_type_t<Polygon>,
                          false // do not check self intersections
                      >::apply(exterior_ring(polygon), visitor, strategy))
             {

@@ -3,7 +3,7 @@
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2014 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2014 Mateusz Loskot, London, UK.
-// Copyright (c) 2014-2017 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2014-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017-2021.
 // Modifications copyright (c) 2017-2021 Oracle and/or its affiliates.
@@ -50,7 +50,7 @@ namespace boost { namespace geometry
 template <typename T>
 struct collected_vector_cartesian
 {
-    typedef T type;
+    using type = T;
 
     inline collected_vector_cartesian()
     {}
@@ -143,9 +143,9 @@ private:
 template <typename T, typename Point>
 struct collected_vector_spherical
 {
-    typedef T type;
+    using type = T;
 
-    typedef model::point<T, 3, cs::cartesian> vector_type;
+    using vector_type = model::point<T, 3, cs::cartesian>;
 
     collected_vector_spherical()
     {}
@@ -250,11 +250,11 @@ struct collected_vector_polar
 private:
     static base_point_type to_equatorial(Point const& p)
     {
-        using coord_type = typename coordinate_type<Point>::type;
+        using coord_type = coordinate_type_t<Point>;
         using constants = math::detail::constants_on_spheroid
             <
                 coord_type,
-                typename coordinate_system<Point>::type::units
+                coordinate_system_t<Point>::units
             > ;
 
         constexpr coord_type pi_2 = constants::half_period() / 2;
@@ -277,8 +277,8 @@ namespace detail { namespace collect_vectors
 template <typename Range, typename Collection>
 struct range_collect_vectors
 {
-    typedef typename boost::range_value<Collection>::type item_type;
-    typedef typename item_type::type calculation_type;
+    using item_type = typename boost::range_value<Collection>::type;
+    using calculation_type = typename item_type::type;
 
     static inline void apply(Collection& collection, Range const& range)
     {
@@ -334,22 +334,21 @@ private:
 
 
 // Default version (cartesian)
-template <typename Box, typename Collection, typename CSTag = typename cs_tag<Box>::type>
+template <typename Box, typename Collection, typename CSTag = cs_tag_t<Box>>
 struct box_collect_vectors
 {
     // Calculate on coordinate type, but if it is integer,
     // then use double
-    typedef typename boost::range_value<Collection>::type item_type;
-    typedef typename item_type::type calculation_type;
+    using item_type = typename boost::range_value<Collection>::type;
+    using calculation_type = typename item_type::type;
 
     static inline void apply(Collection& collection, Box const& box)
     {
-        typename point_type<Box>::type lower_left, lower_right,
-            upper_left, upper_right;
+        point_type_t<Box> lower_left, lower_right, upper_left, upper_right;
         geometry::detail::assign_box_corners(box, lower_left, lower_right,
             upper_left, upper_right);
 
-        typedef typename boost::range_value<Collection>::type item;
+        using item = typename boost::range_value<Collection>::type;
 
         collection.push_back(item(get<0>(lower_left), get<1>(lower_left), 0, 1));
         collection.push_back(item(get<0>(upper_left), get<1>(upper_left), 1, 0));
@@ -365,12 +364,11 @@ struct box_collect_vectors<Box, Collection, spherical_equatorial_tag>
 {
     static inline void apply(Collection& collection, Box const& box)
     {
-        typename point_type<Box>::type lower_left, lower_right,
-                upper_left, upper_right;
+        point_type_t<Box> lower_left, lower_right, upper_left, upper_right;
         geometry::detail::assign_box_corners(box, lower_left, lower_right,
                 upper_left, upper_right);
 
-        typedef typename boost::range_value<Collection>::type item;
+        using item = typename boost::range_value<Collection>::type;
 
         collection.push_back(item(lower_left, upper_left));
         collection.push_back(item(upper_left, upper_right));
@@ -395,9 +393,9 @@ struct polygon_collect_vectors
 {
     static inline void apply(Collection& collection, Polygon const& polygon)
     {
-        typedef typename geometry::ring_type<Polygon>::type ring_type;
+        using ring_type = geometry::ring_type_t<Polygon>;
 
-        typedef range_collect_vectors<ring_type, Collection> per_range;
+        using per_range = range_collect_vectors<ring_type, Collection>;
         per_range::apply(collection, exterior_ring(polygon));
 
         auto const& rings = interior_rings(polygon);
@@ -504,7 +502,7 @@ inline void collect_vectors(Collection& collection, Geometry const& geometry)
 
     dispatch::collect_vectors
         <
-            typename tag<Geometry>::type,
+            tag_t<Geometry>,
             Collection,
             Geometry
         >::apply(collection, geometry);

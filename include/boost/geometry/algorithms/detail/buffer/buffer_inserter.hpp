@@ -1,7 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2012-2020 Barend Gehrels, Amsterdam, the Netherlands.
-// Copyright (c) 2022-2023 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2022-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017-2022.
 // Modifications copyright (c) 2017-2022 Oracle and/or its affiliates.
@@ -622,8 +622,8 @@ template
 >
 struct buffer_inserter<linestring_tag, Linestring, Polygon>
 {
-    using output_ring_type = typename ring_type<Polygon>::type;
-    using output_point_type = typename point_type<output_ring_type>::type;
+    using output_ring_type = ring_type_t<Polygon>;
+    using output_point_type = point_type_t<output_ring_type>;
 
     template
     <
@@ -764,10 +764,10 @@ template
 struct buffer_inserter<polygon_tag, PolygonInput, PolygonOutput>
 {
 private:
-    typedef typename ring_type<PolygonInput>::type input_ring_type;
-    typedef typename ring_type<PolygonOutput>::type output_ring_type;
+    using input_ring_type = ring_type_t<PolygonInput>;
+    using output_ring_type = ring_type_t<PolygonOutput>;
 
-    typedef buffer_inserter_ring<input_ring_type, output_ring_type> policy;
+    using policy = buffer_inserter_ring<input_ring_type, output_ring_type>;
 
 
     template
@@ -890,20 +890,17 @@ template
     typename PolygonOutput
 >
 struct buffer_inserter<multi_tag, Multi, PolygonOutput>
-    : public detail::buffer::buffer_multi
-             <
-                Multi,
-                PolygonOutput,
-                dispatch::buffer_inserter
+    : detail::buffer::buffer_multi
+        <
+            Multi,
+            PolygonOutput,
+            dispatch::buffer_inserter
                 <
-                    typename single_tag_of
-                                <
-                                    typename tag<Multi>::type
-                                >::type,
+                    single_tag_of_t<tag_t<Multi>>,
                     typename boost::range_value<Multi const>::type,
-                    typename geometry::ring_type<PolygonOutput>::type
+                    geometry::ring_type_t<PolygonOutput>
                 >
-            >
+        >
 {};
 
 
@@ -943,7 +940,7 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
 
     using collection_type = detail::buffer::buffered_piece_collection
         <
-            typename geometry::ring_type<GeometryOutput>::type,
+            geometry::ring_type_t<GeometryOutput>,
             Strategies,
             DistanceStrategy,
             RobustPolicy
@@ -955,11 +952,7 @@ inline void buffer_inserter(GeometryInput const& geometry_input, OutputIterator 
 
     dispatch::buffer_inserter
         <
-            typename tag_cast
-                <
-                    typename tag<GeometryInput>::type,
-                    multi_tag
-                >::type,
+            tag_cast_t<tag_t<GeometryInput>, multi_tag>,
             GeometryInput,
             GeometryOutput
         >::apply(geometry_input, collection,

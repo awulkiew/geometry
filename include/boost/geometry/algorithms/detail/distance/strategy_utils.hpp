@@ -1,7 +1,8 @@
 // Boost.Geometry
 
-// Copyright (c) 2021, Oracle and/or its affiliates.
+// Copyright (c) 2024 Adam Wulkiewicz, Lodz, Poland.
 
+// Copyright (c) 2021, Oracle and/or its affiliates.
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
 
 // Licensed under the Boost Software License version 1.0.
@@ -35,8 +36,8 @@ template <typename Geometry1, typename Geometry2, typename Strategies>
 using return_t = typename strategy::distance::services::return_type
     <
         strategy_t<Geometry1, Geometry2, Strategies>,
-        typename point_type<Geometry1>::type,
-        typename point_type<Geometry2>::type
+        point_type_t<Geometry1>,
+        point_type_t<Geometry2>
     >::type;
 
 
@@ -51,8 +52,8 @@ template <typename Geometry1, typename Geometry2, typename Strategies>
 using creturn_t = typename strategy::distance::services::return_type
     <
         cstrategy_t<Geometry1, Geometry2, Strategies>,
-        typename point_type<Geometry1>::type,
-        typename point_type<Geometry2>::type
+        point_type_t<Geometry1>,
+        point_type_t<Geometry2>
     >::type;
 
 

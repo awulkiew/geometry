@@ -1,7 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
-// Copyright (c) 2023 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2023-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2020-2021.
 // Modifications copyright (c) 2020-2021, Oracle and/or its affiliates.
@@ -92,7 +92,7 @@ struct copy_segment_point_polygon
         // Call ring-version with the right ring
         return copy_segment_point_range
             <
-                typename geometry::ring_type<Polygon>::type,
+                geometry::ring_type_t<Polygon>,
                 Reverse,
                 SegmentIdentifier,
                 PointOut

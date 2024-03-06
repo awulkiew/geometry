@@ -78,35 +78,34 @@ struct ring_return_type
 template <typename LineString>
 struct ring_return_type<linestring_tag, LineString>
 {
-    typedef LineString& type;
+    using type = LineString&;
 };
 
 
 template <typename Ring>
 struct ring_return_type<ring_tag, Ring>
 {
-    typedef Ring& type;
+    using type = Ring&;
 };
 
 
 template <typename Polygon>
 struct ring_return_type<polygon_tag, Polygon>
 {
-    typedef typename std::remove_const<Polygon>::type nc_polygon_type;
-
-    typedef std::conditional_t
+    using nc_polygon_type = std::remove_const_t<Polygon>;
+    using type = std::conditional_t
         <
             std::is_const<Polygon>::value,
             typename traits::ring_const_type<nc_polygon_type>::type,
             typename traits::ring_mutable_type<nc_polygon_type>::type
-        > type;
+        >;
 };
 
 
 template <typename MultiLinestring>
 struct ring_return_type<multi_linestring_tag, MultiLinestring>
 {
-    typedef typename ring_return_type
+    using type = typename ring_return_type
         <
             linestring_tag,
             std::conditional_t
@@ -115,14 +114,14 @@ struct ring_return_type<multi_linestring_tag, MultiLinestring>
                     typename boost::range_value<MultiLinestring>::type const,
                     typename boost::range_value<MultiLinestring>::type
                 >
-        >::type type;
+        >::type;
 };
 
 
 template <typename MultiPolygon>
 struct ring_return_type<multi_polygon_tag, MultiPolygon>
 {
-    typedef typename ring_return_type
+    using type = typename ring_return_type
         <
             polygon_tag,
             std::conditional_t
@@ -131,7 +130,7 @@ struct ring_return_type<multi_polygon_tag, MultiPolygon>
                     typename boost::range_value<MultiPolygon>::type const,
                     typename boost::range_value<MultiPolygon>::type
                 >
-        >::type type;
+        >::type;
 };
 
 
@@ -143,44 +142,44 @@ struct ring_type
 template <typename Linestring>
 struct ring_type<linestring_tag, Linestring>
 {
-    typedef Linestring type;
+    using type = Linestring;
 };
 
 
 template <typename Ring>
 struct ring_type<ring_tag, Ring>
 {
-    typedef Ring type;
+    using type = Ring;
 };
 
 
 template <typename Polygon>
 struct ring_type<polygon_tag, Polygon>
 {
-    typedef typename std::remove_reference
+    using type = std::remove_reference_t
         <
             typename ring_return_type<polygon_tag, Polygon>::type
-        >::type type;
+        >;
 };
 
 
 template <typename MultiLinestring>
 struct ring_type<multi_linestring_tag, MultiLinestring>
 {
-    typedef typename std::remove_reference
+    using type = std::remove_reference_t
         <
             typename ring_return_type<multi_linestring_tag, MultiLinestring>::type
-        >::type type;
+        >;
 };
 
 
 template <typename MultiPolygon>
 struct ring_type<multi_polygon_tag, MultiPolygon>
 {
-    typedef typename std::remove_reference
+    using type = std::remove_reference_t
         <
             typename ring_return_type<multi_polygon_tag, MultiPolygon>::type
-        >::type type;
+        >;
 };
 
 
@@ -204,10 +203,11 @@ struct ring_type
 {
     using type = typename core_dispatch::ring_type
         <
-            typename tag<Geometry>::type,
+            tag_t<Geometry>,
             Geometry
         >::type;
 };
+
 
 template <typename Geometry>
 using ring_type_t = typename ring_type<Geometry>::type;
@@ -218,10 +218,11 @@ struct ring_return_type
 {
     using type = typename core_dispatch::ring_return_type
         <
-            typename tag<Geometry>::type,
+            tag_t<Geometry>,
             Geometry
         >::type;
 };
+
 
 template <typename Geometry>
 using ring_return_type_t = typename ring_return_type<Geometry>::type;

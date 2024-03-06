@@ -3,6 +3,7 @@
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
+// Copyright (c) 2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2020.
 // Modifications copyright (c) 2020, Oracle and/or its affiliates.
@@ -75,13 +76,11 @@ struct exterior_ring
 template <typename Polygon>
 struct exterior_ring<polygon_tag, Polygon>
 {
-    static
-    typename geometry::ring_return_type<Polygon>::type
-        apply(Polygon& polygon)
+    static decltype(auto) apply(Polygon& polygon)
     {
         return traits::exterior_ring
             <
-                typename std::remove_const<Polygon>::type
+                std::remove_const_t<Polygon>
             >::get(polygon);
     }
 };
@@ -100,11 +99,11 @@ struct exterior_ring<polygon_tag, Polygon>
     \return a reference to the exterior ring
 */
 template <typename Polygon>
-inline typename ring_return_type<Polygon>::type exterior_ring(Polygon& polygon)
+inline decltype(auto) exterior_ring(Polygon& polygon)
 {
     return core_dispatch::exterior_ring
         <
-            typename tag<Polygon>::type,
+            tag_t<Polygon>,
             Polygon
         >::apply(polygon);
 }
@@ -121,12 +120,11 @@ inline typename ring_return_type<Polygon>::type exterior_ring(Polygon& polygon)
 \qbk{distinguish,const version}
 */
 template <typename Polygon>
-inline typename ring_return_type<Polygon const>::type exterior_ring(
-        Polygon const& polygon)
+inline decltype(auto) exterior_ring(Polygon const& polygon)
 {
     return core_dispatch::exterior_ring
         <
-            typename tag<Polygon>::type,
+            tag_t<Polygon>,
             Polygon const
         >::apply(polygon);
 }

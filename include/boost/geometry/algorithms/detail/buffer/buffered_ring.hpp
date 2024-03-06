@@ -1,6 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2012-2015 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2020.
 // Modifications copyright (c) 2020 Oracle and/or its affiliates.
@@ -268,17 +269,16 @@ namespace detail { namespace overlay
 template<>
 struct get_ring<detail::buffer::buffered_ring_collection_tag>
 {
-    template<typename MultiGeometry>
-    static inline typename ring_type<MultiGeometry>::type const& apply(
-                ring_identifier const& id,
-                MultiGeometry const& multi_ring)
+    template<typename MultiRing>
+    static inline auto const& apply(ring_identifier const& id,
+                                    MultiRing const& multi_ring)
     {
         BOOST_GEOMETRY_ASSERT
             (
                 id.multi_index >= 0
-                && id.multi_index < int(boost::size(multi_ring))
+                && id.multi_index < signed_size_type(boost::size(multi_ring))
             );
-        return get_ring<ring_tag>::apply(id, multi_ring[id.multi_index]);
+        return multi_ring[id.multi_index];
     }
 };
 

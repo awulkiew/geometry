@@ -3,6 +3,7 @@
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2014 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2014 Mateusz Loskot, London, UK.
+// Copyright (c) 2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2014-2023.
 // Modifications copyright (c) 2014-2023, Oracle and/or its affiliates.
@@ -75,12 +76,12 @@ struct perimeter<Geometry, ring_tag>
 template <typename Polygon>
 struct perimeter<Polygon, polygon_tag> : detail::calculate_polygon_sum
 {
-    typedef typename default_length_result<Polygon>::type return_type;
-    typedef detail::length::range_length
-                <
-                    typename ring_type<Polygon>::type,
-                    closure<Polygon>::value
-                > policy;
+    using return_type = typename default_length_result<Polygon>::type;
+    using policy = detail::length::range_length
+        <
+            ring_type_t<Polygon>,
+            closure<Polygon>::value
+        >;
 
     template <typename Strategy>
     static inline return_type apply(Polygon const& polygon, Strategy const& strategy)
@@ -92,7 +93,7 @@ struct perimeter<Polygon, polygon_tag> : detail::calculate_polygon_sum
 template <typename MultiPolygon>
 struct perimeter<MultiPolygon, multi_polygon_tag> : detail::multi_sum
 {
-    typedef typename default_length_result<MultiPolygon>::type return_type;
+    using return_type = typename default_length_result<MultiPolygon>::type;
 
     template <typename Strategy>
     static inline return_type apply(MultiPolygon const& multi, Strategy const& strategy)
@@ -122,8 +123,7 @@ template
 struct perimeter
 {
     template <typename Geometry>
-    static inline typename default_length_result<Geometry>::type
-    apply(Geometry const& geometry, Strategies const& strategies)
+    static inline auto apply(Geometry const& geometry, Strategies const& strategies)
     {
         return dispatch::perimeter<Geometry>::apply(geometry, strategies);
     }
@@ -133,8 +133,7 @@ template <typename Strategy>
 struct perimeter<Strategy, false>
 {
     template <typename Geometry>
-    static inline typename default_length_result<Geometry>::type
-    apply(Geometry const& geometry, Strategy const& strategy)
+    static inline auto apply(Geometry const& geometry, Strategy const& strategy)
     {
         using strategies::length::services::strategy_converter;
         return dispatch::perimeter<Geometry>::apply(
@@ -146,13 +145,12 @@ template <>
 struct perimeter<default_strategy, false>
 {
     template <typename Geometry>
-    static inline typename default_length_result<Geometry>::type
-    apply(Geometry const& geometry, default_strategy const&)
+    static inline auto apply(Geometry const& geometry, default_strategy const&)
     {
-        typedef typename strategies::length::services::default_strategy
+        using strategies_type = typename strategies::length::services::default_strategy
             <
                 Geometry
-            >::type strategies_type;
+            >::type;
 
         return dispatch::perimeter<Geometry>::apply(geometry, strategies_type());
     }
@@ -167,8 +165,7 @@ template <typename Geometry, typename Tag = typename geometry::tag<Geometry>::ty
 struct perimeter
 {
     template <typename Strategy>
-    static inline typename default_length_result<Geometry>::type
-    apply(Geometry const& geometry, Strategy const& strategy)
+    static inline auto apply(Geometry const& geometry, Strategy const& strategy)
     {
         concepts::check<Geometry const>();
         return resolve_strategy::perimeter<Strategy>::apply(geometry, strategy);
@@ -179,8 +176,7 @@ template <typename Geometry>
 struct perimeter<Geometry, dynamic_geometry_tag>
 {
     template <typename Strategy>
-    static inline typename default_length_result<Geometry>::type
-    apply(Geometry const& geometry, Strategy const& strategy)
+    static inline auto apply(Geometry const& geometry, Strategy const& strategy)
     {
         typename default_length_result<Geometry>::type result = 0;
         traits::visit<Geometry>::apply([&](auto const& g)
@@ -195,8 +191,7 @@ template <typename Geometry>
 struct perimeter<Geometry, geometry_collection_tag>
 {
     template <typename Strategy>
-    static inline typename default_length_result<Geometry>::type
-    apply(Geometry const& geometry, Strategy const& strategy)
+    static inline auto apply(Geometry const& geometry, Strategy const& strategy)
     {
         typename default_length_result<Geometry>::type result = 0;
         detail::visit_breadth_first([&](auto const& g)
@@ -228,8 +223,7 @@ struct perimeter<Geometry, geometry_collection_tag>
 }
  */
 template<typename Geometry>
-inline typename default_length_result<Geometry>::type perimeter(
-        Geometry const& geometry)
+inline auto perimeter(Geometry const& geometry)
 {
     // detail::throw_on_empty_input(geometry);
     return resolve_dynamic::perimeter<Geometry>::apply(geometry, default_strategy());
@@ -250,8 +244,7 @@ inline typename default_length_result<Geometry>::type perimeter(
 \qbk{[include reference/algorithms/perimeter.qbk]}
  */
 template<typename Geometry, typename Strategy>
-inline typename default_length_result<Geometry>::type perimeter(
-        Geometry const& geometry, Strategy const& strategy)
+inline auto perimeter(Geometry const& geometry, Strategy const& strategy)
 {
     // detail::throw_on_empty_input(geometry);
     return resolve_dynamic::perimeter<Geometry>::apply(geometry, strategy);

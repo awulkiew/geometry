@@ -3,6 +3,7 @@
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
+// Copyright (c) 2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2020-2023.
 // Modifications copyright (c) 2020-2023, Oracle and/or its affiliates.
@@ -66,35 +67,38 @@ namespace core_dispatch
 
 template
 <
-    typename GeometryTag,
-    typename Geometry
+    typename Geometry,
+    typename Tag = tag_t<Geometry>
 >
-struct interior_rings {};
+struct interior_rings
+{
+    BOOST_GEOMETRY_STATIC_ASSERT_FALSE(
+        "Not implemented for this Geometry Tag type.",
+        Geometry, Tag);
+};
 
 
 template <typename Polygon>
-struct interior_rings<polygon_tag, Polygon>
+struct interior_rings<Polygon, polygon_tag>
 {
-    static inline
-    typename geometry::interior_return_type<Polygon>::type
-                apply(Polygon& polygon)
+    static inline decltype(auto) apply(Polygon& polygon)
     {
         return traits::interior_rings
             <
-                typename std::remove_const<Polygon>::type
+                std::remove_const_t<Polygon>
             >::get(polygon);
     }
 };
 
 
 template <typename MultiPolygon>
-struct interior_type<multi_polygon_tag, MultiPolygon>
+struct interior_type<MultiPolygon, multi_polygon_tag>
 {
-    typedef typename core_dispatch::interior_type
+    using type = typename core_dispatch::interior_type
         <
-            polygon_tag,
-            typename boost::range_value<MultiPolygon>::type
-        >::type type;
+            typename boost::range_value<MultiPolygon>::type,
+            polygon_tag
+        >::type;
 };
 
 
@@ -113,13 +117,9 @@ struct interior_type<multi_polygon_tag, MultiPolygon>
 */
 
 template <typename Polygon>
-inline typename interior_return_type<Polygon>::type interior_rings(Polygon& polygon)
+inline decltype(auto) interior_rings(Polygon& polygon)
 {
-    return core_dispatch::interior_rings
-        <
-            typename tag<Polygon>::type,
-            Polygon
-        >::apply(polygon);
+    return core_dispatch::interior_rings<Polygon>::apply(polygon);
 }
 
 
@@ -134,14 +134,9 @@ inline typename interior_return_type<Polygon>::type interior_rings(Polygon& poly
 \qbk{distinguish,const version}
 */
 template <typename Polygon>
-inline typename interior_return_type<Polygon const>::type interior_rings(
-            Polygon const& polygon)
+inline decltype(auto) interior_rings(Polygon const& polygon)
 {
-    return core_dispatch::interior_rings
-        <
-            typename tag<Polygon>::type,
-            Polygon const
-        >::apply(polygon);
+    return core_dispatch::interior_rings<Polygon const>::apply(polygon);
 }
 
 

@@ -3,7 +3,7 @@
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2014 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2014 Mateusz Loskot, London, UK.
-// Copyright (c) 2013-2014 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2013-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2014-2021.
 // Modifications copyright (c) 2014-2021, Oracle and/or its affiliates.
@@ -100,7 +100,7 @@ struct point_to_segment
     static inline auto apply(Point const& point, Segment const& segment,
                              Strategies const& strategies)
     {
-        typename point_type<Segment>::type p[2];
+        point_type_t<Segment> p[2];
         geometry::detail::assign_point_from_index<0>(segment, p[0]);
         geometry::detail::assign_point_from_index<1>(segment, p[1]);
 
@@ -117,7 +117,7 @@ struct point_to_segment<Point, Segment, Strategy, false>
     static inline auto apply(Point const& point, Segment const& segment,
                              Strategy const& strategy)
     {
-        typename point_type<Segment>::type p[2];
+        point_type_t<Segment> p[2];
         geometry::detail::assign_point_from_index<0>(segment, p[0]);
         geometry::detail::assign_point_from_index<1>(segment, p[1]);
 
@@ -166,15 +166,15 @@ template
 class point_to_range
 {
 private:
-    typedef distance::strategy_t<Point, Range, Strategies> strategy_type;
+    using strategy_type = distance::strategy_t<Point, Range, Strategies>;
 
-    typedef detail::closest_feature::point_to_point_range
+    using point_to_point_range = detail::closest_feature::point_to_point_range
         <
             Point, Range, Closure
-        > point_to_point_range;
+        >;
 
 public:
-    typedef distance::return_t<Point, Range, Strategies> return_type;
+    using return_type = distance::return_t<Point, Range, Strategies>;
 
     static inline return_type apply(Point const& point, Range const& range,
                                     Strategies const& strategies)
@@ -219,7 +219,7 @@ template
 >
 struct point_to_ring
 {
-    typedef distance::return_t<Point, Ring, Strategies> return_type;
+    using return_type = distance::return_t<Point, Ring, Strategies>;
 
     static inline return_type apply(Point const& point,
                                     Ring const& ring,
@@ -248,13 +248,13 @@ template
 class point_to_polygon
 {
 public:
-    typedef distance::return_t<Point, Polygon, Strategies> return_type;
+    using return_type = distance::return_t<Point, Polygon, Strategies>;
 
 private:
-    typedef point_to_range
+    using per_ring = point_to_range
         <
-            Point, typename ring_type<Polygon>::type, Closure, Strategies
-        > per_ring;
+            Point, ring_type_t<Polygon>, Closure, Strategies
+        >;
 
     struct distance_to_interior_rings
     {
@@ -317,24 +317,24 @@ template
     typename Strategies,
     bool CheckCoveredBy = std::is_same
         <
-            typename tag<MultiGeometry>::type, multi_polygon_tag
+            tag_t<MultiGeometry>, multi_polygon_tag
         >::value
 >
 class point_to_multigeometry
 {
 private:
-    typedef detail::closest_feature::geometry_to_range geometry_to_range;
+    using geometry_to_range = detail::closest_feature::geometry_to_range;
 
-    typedef distance::strategy_t<Point, MultiGeometry, Strategies> strategy_type;
+    using strategy_type = distance::strategy_t<Point, MultiGeometry, Strategies>;
 
 public:
-    typedef distance::return_t<Point, MultiGeometry, Strategies> return_type;
+    using return_type = distance::return_t<Point, MultiGeometry, Strategies>;
 
     static inline return_type apply(Point const& point,
                                     MultiGeometry const& multigeometry,
                                     Strategies const& strategies)
     {
-        typedef iterator_selector<MultiGeometry const> selector_type;
+        using selector_type = iterator_selector<MultiGeometry const>;
 
         distance::creturn_t<Point, MultiGeometry, Strategies> cd;
 
@@ -375,7 +375,7 @@ public:
 template <typename Point, typename MultiPolygon, typename Strategies>
 struct point_to_multigeometry<Point, MultiPolygon, Strategies, true>
 {
-    typedef distance::return_t<Point, MultiPolygon, Strategies> return_type;
+    using return_type = distance::return_t<Point, MultiPolygon, Strategies>;
 
     static inline return_type apply(Point const& point,
                                     MultiPolygon const& multipolygon,

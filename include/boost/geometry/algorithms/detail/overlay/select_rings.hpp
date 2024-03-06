@@ -1,7 +1,7 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
 // Copyright (c) 2007-2014 Barend Gehrels, Amsterdam, the Netherlands.
-// Copyright (c) 2014 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2014-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2017-2022.
 // Modifications copyright (c) 2017-2022 Oracle and/or its affiliates.
@@ -86,7 +86,7 @@ namespace dispatch
                     ring_identifier const& id, RingPropertyMap& ring_properties,
                     Strategy const& strategy)
         {
-            if (boost::size(ring) > 0)
+            if (! boost::empty(ring))
             {
                 ring_properties[id] = typename RingPropertyMap::mapped_type(ring, strategy);
             }
@@ -97,7 +97,7 @@ namespace dispatch
                     ring_identifier const& id, RingPropertyMap& ring_properties,
                     Strategy const& strategy)
         {
-            if (boost::size(ring) > 0)
+            if (! boost::empty(ring))
             {
                 ring_properties[id] = typename RingPropertyMap::mapped_type(ring, strategy);
             }
@@ -113,8 +113,7 @@ namespace dispatch
                     ring_identifier id, RingPropertyMap& ring_properties,
                     Strategy const& strategy)
         {
-            typedef typename geometry::ring_type<Polygon>::type ring_type;
-            typedef select_rings<ring_tag, ring_type> per_ring;
+            using per_ring = select_rings<ring_tag, geometry::ring_type_t<Polygon>>;
 
             per_ring::apply(exterior_ring(polygon), geometry, id, ring_properties, strategy);
 
@@ -131,8 +130,7 @@ namespace dispatch
                 ring_identifier id, RingPropertyMap& ring_properties,
                 Strategy const& strategy)
         {
-            typedef typename geometry::ring_type<Polygon>::type ring_type;
-            typedef select_rings<ring_tag, ring_type> per_ring;
+            using per_ring = select_rings<ring_tag, geometry::ring_type_t<Polygon>>;
 
             per_ring::apply(exterior_ring(polygon), id, ring_properties, strategy);
 
@@ -153,7 +151,7 @@ namespace dispatch
                     ring_identifier id, RingPropertyMap& ring_properties,
                     Strategy const& strategy)
         {
-            typedef select_rings<polygon_tag, typename boost::range_value<Multi>::type> per_polygon;
+            using per_polygon = select_rings<polygon_tag, typename boost::range_value<Multi>::type>;
 
             id.multi_index = 0;
             for (auto it = boost::begin(multi); it != boost::end(multi); ++it)

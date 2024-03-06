@@ -3,6 +3,7 @@
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
+// Copyright (c) 2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2020.
 // Modifications copyright (c) 2020, Oracle and/or its affiliates.
@@ -81,14 +82,13 @@ struct interior_return_type
 template <typename Polygon>
 struct interior_return_type<polygon_tag, Polygon>
 {
-    typedef typename std::remove_const<Polygon>::type nc_polygon_type;
-
-    typedef std::conditional_t
+    using nc_polygon_type = std::remove_const_t<Polygon>;
+    using type = std::conditional_t
         <
             std::is_const<Polygon>::value,
             typename traits::interior_const_type<nc_polygon_type>::type,
             typename traits::interior_mutable_type<nc_polygon_type>::type
-        > type;
+        >;
 };
 
 
@@ -106,10 +106,10 @@ struct interior_type
 template <typename Polygon>
 struct interior_type<polygon_tag, Polygon>
 {
-    typedef typename std::remove_reference
+    using type = std::remove_reference_t
         <
             typename interior_return_type<polygon_tag, Polygon>::type
-        >::type type;
+        >;
 };
 
 
@@ -132,22 +132,31 @@ struct interior_type<polygon_tag, Polygon>
 template <typename Geometry>
 struct interior_type
 {
-    typedef typename core_dispatch::interior_type
+    using type = typename core_dispatch::interior_type
         <
-            typename tag<Geometry>::type,
+            tag_t<Geometry>,
             Geometry
-        >::type type;
+        >::type;
 };
+
+
+template <typename Geometry>
+using interior_type_t = typename interior_type<Geometry>::type;
+
 
 template <typename Geometry>
 struct interior_return_type
 {
-    typedef typename core_dispatch::interior_return_type
+    using type = typename core_dispatch::interior_return_type
         <
-            typename tag<Geometry>::type,
+            tag_t<Geometry>,
             Geometry
-        >::type type;
+        >::type;
 };
+
+
+template <typename Geometry>
+using interior_return_type_t = typename interior_return_type<Geometry>::type;
 
 
 }} // namespace boost::geometry

@@ -3,7 +3,7 @@
 // Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 // Copyright (c) 2008-2012 Bruno Lalande, Paris, France.
 // Copyright (c) 2009-2012 Mateusz Loskot, London, UK.
-// Copyright (c) 2014 Adam Wulkiewicz, Lodz, Poland.
+// Copyright (c) 2014-2024 Adam Wulkiewicz, Lodz, Poland.
 
 // This file was modified by Oracle on 2013-2021.
 // Modifications copyright (c) 2013-2021, Oracle and/or its affiliates.
@@ -71,8 +71,11 @@ namespace detail_dispatch { namespace within {
 // returns 0 if P is on the boundry of G
 // returns -1 if P is in the exterior of G
 
-template <typename Geometry,
-          typename Tag = typename geometry::tag<Geometry>::type>
+template
+<
+    typename Geometry,
+    typename Tag = geometry::tag_t<Geometry>
+>
 struct point_in_geometry
     : not_implemented<Tag>
 {};
@@ -83,7 +86,7 @@ struct point_in_geometry<Point2, point_tag>
     template <typename Point1, typename Strategy> static inline
     int apply(Point1 const& point1, Point2 const& point2, Strategy const& strategy)
     {
-        typedef decltype(strategy.relate(point1, point2)) strategy_type;
+        using strategy_type = decltype(strategy.relate(point1, point2));
         return strategy_type::apply(point1, point2) ? 1 : -1;
     }
 };
@@ -94,8 +97,7 @@ struct point_in_geometry<Segment, segment_tag>
     template <typename Point, typename Strategy> static inline
     int apply(Point const& point, Segment const& segment, Strategy const& strategy)
     {
-        typedef typename geometry::point_type<Segment>::type point_type;
-        point_type p0, p1;
+        geometry::point_type_t<Segment> p0, p1;
 // TODO: don't copy points
         detail::assign_point_from_index<0>(segment, p0);
         detail::assign_point_from_index<1>(segment, p1);
@@ -124,7 +126,7 @@ struct point_in_geometry<Linestring, linestring_tag>
     template <typename Point, typename Strategy> static inline
     int apply(Point const& point, Linestring const& linestring, Strategy const& strategy)
     {
-        std::size_t count = boost::size(linestring);
+        std::size_t const count = boost::size(linestring);
         if ( count > 1 )
         {
             if ( detail::within::point_in_range(point, linestring,
@@ -133,7 +135,7 @@ struct point_in_geometry<Linestring, linestring_tag>
                 return -1; // exterior
             }
 
-            typedef typename boost::range_value<Linestring>::type point_type;
+            using point_type = typename boost::range_value<Linestring>::type;
             point_type const& front = range::front(linestring);
             point_type const& back = range::back(linestring);
 
@@ -171,10 +173,7 @@ struct point_in_geometry<Ring, ring_tag>
     template <typename Point, typename Strategy> static inline
     int apply(Point const& point, Ring const& ring, Strategy const& strategy)
     {
-        if ( boost::size(ring) < core_detail::closure::minimum_ring_size
-                                    <
-                                        geometry::closure<Ring>::value
-                                    >::value )
+        if (boost::size(ring) < detail::minimum_ring_size<Ring>::value)
         {
             return -1;
         }
@@ -195,7 +194,7 @@ struct point_in_geometry<Polygon, polygon_tag>
     {
         int const code = point_in_geometry
             <
-                typename ring_type<Polygon>::type
+                ring_type_t<Polygon>
             >::apply(point, exterior_ring(polygon), strategy);
 
         if (code == 1)
@@ -205,7 +204,7 @@ struct point_in_geometry<Polygon, polygon_tag>
             {
                 int const interior_code = point_in_geometry
                     <
-                        typename ring_type<Polygon>::type
+                        ring_type_t<Polygon>
                     >::apply(point, *it, strategy);
 
                 if (interior_code != -1)
@@ -227,7 +226,7 @@ struct point_in_geometry<Geometry, multi_point_tag>
     template <typename Point, typename Strategy> static inline
     int apply(Point const& point, Geometry const& geometry, Strategy const& strategy)
     {
-        typedef typename boost::range_value<Geometry>::type point_type;
+        using point_type = typename boost::range_value<Geometry>::type;
         for (auto it = boost::begin(geometry); it != boost::end(geometry); ++it)
         {
             int pip = point_in_geometry<point_type>::apply(point, *it, strategy);
@@ -252,8 +251,8 @@ struct point_in_geometry<Geometry, multi_linestring_tag>
     {
         int pip = -1; // outside
 
-        typedef typename boost::range_value<Geometry>::type linestring_type;
-        typedef typename boost::range_value<linestring_type>::type point_type;
+        using linestring_type = typename boost::range_value<Geometry>::type;
+        using point_type = typename boost::range_value<linestring_type>::type;
         auto it = boost::begin(geometry);
         for ( ; it != boost::end(geometry); ++it)
         {
@@ -315,7 +314,7 @@ struct point_in_geometry<Geometry, multi_polygon_tag>
         // For invalid multipolygons
         //int res = -1; // outside
 
-        typedef typename boost::range_value<Geometry>::type polygon_type;
+        using polygon_type = typename boost::range_value<Geometry>::type;
         for (auto it = boost::begin(geometry); it != boost::end(geometry); ++it)
         {
             int pip = point_in_geometry<polygon_type>::apply(point, *it, strategy);
