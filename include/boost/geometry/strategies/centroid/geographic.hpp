@@ -18,19 +18,23 @@
 #include <boost/geometry/strategies/centroid/services.hpp>
 
 
-namespace boost { namespace geometry
-{
-
-namespace strategies { namespace centroid
+namespace boost { namespace geometry { namespace strategies { namespace centroid
 {
 
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail
 {
 
-class geographic
+template <typename Spheroid, typename Base>
+class geographic : public Base
 {
 public:
+    geographic() = default;
+
+    explicit geographic(Spheroid const& spheroid)
+        : Base(spheroid)
+    {}
+
     // TODO: Box and Segment should have proper strategies.
     template <typename Geometry, typename Point>
     static auto centroid(Geometry const&, Point const&,
@@ -56,10 +60,17 @@ template
     typename CalculationType = void
 >
 class geographic
-    : public strategies::detail::geographic_base<Spheroid>
-    , public strategies::centroid::detail::geographic
+    : public strategies::centroid::detail::geographic
+        <
+            Spheroid,
+            strategies::detail::geographic_base<Spheroid>
+        >
 {
-    using base_t = strategies::detail::geographic_base<Spheroid>;
+    using base_t = strategies::centroid::detail::geographic
+        <
+            Spheroid,
+            strategies::detail::geographic_base<Spheroid>
+        >;
 
 public:
     geographic() = default;
@@ -81,8 +92,6 @@ struct default_strategy<Geometry, geographic_tag>
 
 } // namespace services
 
-}} // namespace strategies::centroid
-
-}} // namespace boost::geometry
+}}}} // namespace boost::geometry::strategies::centroid
 
 #endif // BOOST_GEOMETRY_STRATEGIES_CENTROID_GEOGRAPHIC_HPP

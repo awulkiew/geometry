@@ -28,10 +28,17 @@ template
     typename CalculationType = void
 >
 class geographic
-    : public distance::geographic<FormulaPolicy, Spheroid, CalculationType>
-    , public strategies::centroid::detail::geographic
+    : public strategies::centroid::detail::geographic
+        <
+            Spheroid,
+            distance::geographic<FormulaPolicy, Spheroid, CalculationType>
+        >
 {
-    typedef distance::geographic<FormulaPolicy, Spheroid, CalculationType> base_t;
+    using base_t = strategies::centroid::detail::geographic
+        <
+            Spheroid,
+            distance::geographic<FormulaPolicy, Spheroid, CalculationType>
+        >;
 
 public:
     geographic() = default;

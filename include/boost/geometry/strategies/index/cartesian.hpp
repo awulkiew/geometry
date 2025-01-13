@@ -23,8 +23,11 @@ namespace boost { namespace geometry { namespace strategies { namespace index
 
 template <typename CalculationType = void>
 class cartesian
-    : public distance::cartesian<CalculationType>
-    , public strategies::centroid::detail::cartesian<CalculationType>
+    : public strategies::centroid::detail::cartesian
+        <
+            CalculationType,
+            distance::cartesian<CalculationType>
+        >
 {};
 
 

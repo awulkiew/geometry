@@ -18,19 +18,24 @@
 #include <boost/geometry/strategies/centroid/services.hpp>
 
 
-namespace boost { namespace geometry
-{
-
-namespace strategies { namespace centroid
+namespace boost { namespace geometry { namespace strategies { namespace centroid
 {
 
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail
 {
 
-class spherical
+template <typename Base>
+class spherical : public Base
 {
 public:
+    spherical() = default;
+
+    template <typename RadiusOrSphere>
+    explicit spherical(RadiusOrSphere const& radius_or_sphere)
+        : Base(radius_or_sphere)
+    {}
+
     // TODO: Box and Segment should have proper strategies.
     template <typename Geometry, typename Point>
     static auto centroid(Geometry const&, Point const&,
@@ -51,12 +56,11 @@ public:
 
 template <typename CalculationType = void>
 class spherical
-    : public strategies::detail::spherical_base<void>
-    , public strategies::centroid::detail::spherical
-{
-public:
-    spherical() = default;
-};
+    : public strategies::centroid::detail::spherical
+        <
+            strategies::detail::spherical_base<void>
+        >
+{};
 
 
 namespace services
@@ -70,8 +74,6 @@ struct default_strategy<Geometry, spherical_equatorial_tag>
 
 } // namespace services
 
-}} // namespace strategies::centroid
-
-}} // namespace boost::geometry
+}}}} // namespace boost::geometry::strategies::centroid
 
 #endif // BOOST_GEOMETRY_STRATEGIES_CENTROID_SPHERICAL_HPP

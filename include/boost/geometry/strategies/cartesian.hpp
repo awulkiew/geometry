@@ -29,22 +29,19 @@
 #include <boost/geometry/strategies/simplify/cartesian.hpp>
 
 
-namespace boost { namespace geometry
+namespace boost { namespace geometry { namespace strategies
 {
-
-
-namespace strategies
-{
-
 
 template <typename CalculationType = void>
 class cartesian
     // derived from the umbrella strategy defining the most strategies
-    : public strategies::closest_points::cartesian<CalculationType>
-    , public strategies::centroid::detail::cartesian<CalculationType>
+    : public strategies::centroid::detail::cartesian
+        <
+            CalculationType,
+            strategies::closest_points::cartesian<CalculationType>
+        >
 {
 public:
-
     static auto azimuth()
     {
         return strategy::azimuth::cartesian<CalculationType>();
@@ -57,10 +54,7 @@ public:
 };
 
 
-} // namespace strategies
-
-
-}} // namespace boost::geometry
+}}} // namespace boost::geometry::strategies
 
 
 #endif // BOOST_GEOMETRY_STRATEGIES_CARTESIAN_HPP

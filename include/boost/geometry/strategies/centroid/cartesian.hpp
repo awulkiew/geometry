@@ -23,18 +23,15 @@
 #include <boost/geometry/util/type_traits.hpp>
 
 
-namespace boost { namespace geometry
-{
-
-namespace strategies { namespace centroid
+namespace boost { namespace geometry { namespace strategies { namespace centroid
 {
 
 #ifndef DOXYGEN_NO_DETAIL
 namespace detail
 {
 
-template <typename CalculationType = void>
-struct cartesian
+template <typename CalculationType, typename Base>
+struct cartesian : Base
 {
     template <typename Geometry>
     static auto centroid(Geometry const&,
@@ -88,8 +85,11 @@ struct cartesian
 
 template <typename CalculationType = void>
 struct cartesian
-    : public strategies::detail::cartesian_base
-    , public strategies::centroid::detail::cartesian<CalculationType>
+    : strategies::centroid::detail::cartesian
+        <
+            CalculationType,
+            strategies::detail::cartesian_base
+        >
 {};
 
 
@@ -132,8 +132,6 @@ struct strategy_converter<strategy::centroid::bashein_detmer<PC, PG, CT> >
 
 } // namespace services
 
-}} // namespace strategies::centroid
-
-}} // namespace boost::geometry
+}}}} // namespace boost::geometry::strategies::centroid
 
 #endif // BOOST_GEOMETRY_STRATEGIES_CENTROID_CARTESIAN_HPP

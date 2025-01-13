@@ -29,13 +29,8 @@
 #include <boost/geometry/strategies/simplify/geographic.hpp>
 
 
-namespace boost { namespace geometry
+namespace boost { namespace geometry { namespace strategies
 {
-
-
-namespace strategies
-{
-
 
 template
 <
@@ -45,10 +40,17 @@ template
 >
 class geographic
     // derived from the umbrella strategy defining the most strategies
-    : public strategies::closest_points::geographic<FormulaPolicy, Spheroid, CalculationType>
-    , public strategies::centroid::detail::geographic
+    : public strategies::centroid::detail::geographic
+        <
+            Spheroid,
+            strategies::closest_points::geographic<FormulaPolicy, Spheroid, CalculationType>
+        >
 {
-    using base_t = strategies::closest_points::geographic<FormulaPolicy, Spheroid, CalculationType>;
+    using base_t = strategies::centroid::detail::geographic
+        <
+            Spheroid,
+            strategies::closest_points::geographic<FormulaPolicy, Spheroid, CalculationType>
+        >;
 
 public:
     geographic() = default;
@@ -75,10 +77,7 @@ public:
 };
 
 
-} // namespace strategies
-
-
-}} // namespace boost::geometry
+}}} // namespace boost::geometry::strategies
 
 
 #endif // BOOST_GEOMETRY_STRATEGIES_GEOGRAPHIC_HPP

@@ -18,40 +18,15 @@
 #include <boost/geometry/strategies/index/services.hpp>
 
 
-namespace boost { namespace geometry
+namespace boost { namespace geometry { namespace strategies { namespace index
 {
-
-namespace strategies { namespace index
-{
-
-#ifndef DOXYGEN_NO_DETAIL
-namespace detail
-{
-
-template <typename RadiusTypeOrSphere, typename CalculationType>
-class spherical
-    : public strategies::distance::detail::spherical<RadiusTypeOrSphere, CalculationType>
-    , public strategies::centroid::detail::spherical
-{
-    using base_t = strategies::distance::detail::spherical<RadiusTypeOrSphere, CalculationType>;
-
-public:
-    spherical() = default;
-
-    template <typename RadiusOrSphere>
-    explicit spherical(RadiusOrSphere const& radius_or_sphere)
-        : base_t(radius_or_sphere)
-    {}
-};
-
-
-} // namespace detail
-#endif // DOXYGEN_NO_DETAIL
-
 
 template <typename CalculationType = void>
 class spherical
-    : public strategies::index::detail::spherical<void, CalculationType>
+    : public strategies::centroid::detail::spherical
+        <
+            strategies::distance::detail::spherical<void, CalculationType>
+        >
 {};
 
 

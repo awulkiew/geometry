@@ -29,13 +29,8 @@
 #include <boost/geometry/strategies/simplify/spherical.hpp>
 
 
-namespace boost { namespace geometry
+namespace boost { namespace geometry { namespace strategies
 {
-
-
-namespace strategies
-{
-
 
 template
 <
@@ -44,10 +39,15 @@ template
 >
 class spherical
     // derived from the umbrella strategy defining the most strategies
-    : public strategies::closest_points::spherical<RadiusTypeOrSphere, CalculationType>
-    , public strategies::centroid::detail::spherical
+    : public strategies::centroid::detail::spherical
+        <
+            strategies::closest_points::spherical<RadiusTypeOrSphere, CalculationType>
+        >
 {
-    using base_t = strategies::closest_points::spherical<RadiusTypeOrSphere, CalculationType>;
+    using base_t = strategies::centroid::detail::spherical
+        <
+            strategies::closest_points::spherical<RadiusTypeOrSphere, CalculationType>
+        >;
 
 public:
     spherical() = default;
@@ -69,10 +69,7 @@ public:
 };
 
 
-} // namespace strategies
-
-
-}} // namespace boost::geometry
+}}} // namespace boost::geometry::strategies
 
 
 #endif // BOOST_GEOMETRY_STRATEGIES_SPHERICAL_HPP

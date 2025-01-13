@@ -1,5 +1,7 @@
 // Boost.Geometry
 
+// Copyright (c) 2025 Adam Wulkiewicz, Lodz, Poland.
+
 // Copyright (c) 2020-2021, Oracle and/or its affiliates.
 
 // Contributed and/or modified by Adam Wulkiewicz, on behalf of Oracle
@@ -54,10 +56,10 @@ template <typename RadiusTypeOrSphere>
 class spherical_base : umbrella_strategy
 {
 protected:
-    typedef typename strategy_detail::get_radius
+    using radius_type = typename strategy_detail::get_radius
         <
             RadiusTypeOrSphere
-        >::type radius_type;
+        >::type;
 
 public:
     using cs_tag = spherical_tag;
@@ -92,7 +94,7 @@ template <>
 class spherical_base<void> : umbrella_strategy
 {
 protected:
-    typedef double radius_type;
+    using radius_type = double;
 
 public:
     using cs_tag = spherical_tag;
@@ -115,9 +117,7 @@ class geographic_base : umbrella_strategy
 public:
     using cs_tag = geographic_tag;
 
-    geographic_base()
-        : m_spheroid()
-    {}
+    geographic_base() = default;
 
     explicit geographic_base(Spheroid const& spheroid)
         : m_spheroid(spheroid)
